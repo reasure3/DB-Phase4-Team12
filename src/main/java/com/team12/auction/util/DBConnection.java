@@ -1,8 +1,6 @@
 package com.team12.auction.util;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DBConnection {
     private static final String URL = "jdbc:oracle:thin:@localhost:1521:orcl";
@@ -72,5 +70,33 @@ public class DBConnection {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * ResultSet, PreparedStatement, Connection 닫기
+     */
+    public static void close(ResultSet rs, PreparedStatement pstmt, Connection conn) {
+        try {
+            if (rs != null) rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (pstmt != null) pstmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * PreparedStatement, Connection 닫기
+     */
+    public static void close(PreparedStatement pstmt, Connection conn) {
+        close(null, pstmt, conn);
     }
 }

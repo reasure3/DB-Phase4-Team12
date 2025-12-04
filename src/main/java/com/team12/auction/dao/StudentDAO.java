@@ -1,90 +1,142 @@
 package com.team12.auction.dao;
 
-import java.sql.*;
-
 import com.team12.auction.model.entity.Student;
+import com.team12.auction.util.DBConnection;
 
-public class StudentDAO extends BaseDao {
-    public StudentDAO(Connection conn) {
-       super(conn);
-    }
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-    
- // 1) 로그인: 학번과 비밀번호가 일치하면 Student 객체 리턴, 아니면 null 리턴
-    public Student login(long studentId, String password) throws SQLException {
+public class StudentDAO {
+    /**
+     * 학번과 비밀번호로 학생 인증
+     */
+    public Student login(int studentId, String password) throws SQLException {
         String sql = "SELECT student_id, name, department, grade, password, max_credits, max_point " +
-                     "FROM Student WHERE student_id = ? AND password = ?";
+                "FROM Student WHERE student_id = ? AND password = ?";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, studentId);
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        Student student = null;
+
+        try {
+            conn = DBConnection.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, studentId);
             pstmt.setString(2, password);
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    Student s = new Student();
-                    s.setStudentId(rs.getInt(1));
-                    s.setName(rs.getString(2));
-                    s.setDepartment(rs.getString(3));
-                    s.setGrade(rs.getInt(4));
-                    s.setPassword(rs.getString(5));
-                    s.setMaxCredits(rs.getInt(6));
-                    s.setMaxPoint(rs.getInt(7));
-                    return s;   // 로그인 성공
-                } else {
-                    return null; // 로그인 실패
-                }
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                student = new Student();
+                student.setStudentId(rs.getInt(1));
+                student.setName(rs.getString(2));
+                student.setDepartment(rs.getString(3));
+                student.setGrade(rs.getInt(4));
+                student.setPassword(rs.getString(5));
+                student.setMaxCredits(rs.getInt(6));
+                student.setMaxPoint(rs.getInt(7));
             }
+
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            DBConnection.close(rs, pstmt, conn);
         }
+
+        return student;
     }
 
-    // 2) 같은 학번이 이미 있는지 확인
-    public boolean existsById(long studentId) throws SQLException {
+    /**
+     * 같은 학번이 이미 있는지 확인
+     */
+    public boolean existsById(int studentId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Student WHERE student_id = ?";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, studentId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    int count = rs.getInt(1);
-                    return count > 0;
-                }
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        boolean exists = false;
+
+        try {
+            conn = DBConnection.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, studentId);
+
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                exists = count > 0;
             }
+
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            DBConnection.close(rs, pstmt, conn);
         }
-        return false;
+
+        return exists;
     }
-    
-    // 3) 회원가입(INSERT)
+
+    /**
+     * 회원가입(INSERT)
+     */
     public int signUp(Student s) throws SQLException {
         String sql = "INSERT INTO Student " +
-                     "(student_id, name, department, grade, password) " +
-                     "VALUES (?, ?, ?, ?, ?)";
+                "(student_id, name, department, grade, password) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, s.getStudentId());
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        int result = 0;
+
+        try {
+            conn = DBConnection.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, s.getStudentId());
             pstmt.setString(2, s.getName());
             pstmt.setString(3, s.getDepartment());
             pstmt.setInt(4, s.getGrade());
             pstmt.setString(5, s.getPassword());
 
-            return pstmt.executeUpdate();  // 1이면 성공
+            result = pstmt.executeUpdate();
+
+            DBConnection.commit(conn);
+
+        } catch (SQLException e) {
+            DBConnection.rollback(conn);
+            throw e;
+        } finally {
+            DBConnection.close(pstmt, conn);
         }
+
+        return result;
     }
-    
+
     /**
      * 학번으로 학생 조회
      */
     public Student selectById(int studentId) throws SQLException {
-        String sql = 
-            "SELECT name, department, grade, password, max_credits, max_point " +
-            "FROM STUDENT " +
-            "WHERE student_id = ?";
-        
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String sql = "SELECT name, department, grade, password, max_credits, max_point " +
+                "FROM Student WHERE student_id = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        Student student = null;
+
+        try {
+            conn = DBConnection.getConnection();
+            pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, studentId);
-            ResultSet rs = pstmt.executeQuery();
-            
+
+            rs = pstmt.executeQuery();
+
             if (rs.next()) {
-                Student student = new Student();
+                student = new Student();
                 student.setStudentId(studentId);
                 student.setName(rs.getString(1));
                 student.setDepartment(rs.getString(2));
@@ -92,11 +144,14 @@ public class StudentDAO extends BaseDao {
                 student.setPassword(rs.getString(4));
                 student.setMaxCredits(rs.getInt(5));
                 student.setMaxPoint(rs.getInt(6));
-                rs.close();
-                return student;
             }
-            rs.close();
-            return null;
+
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            DBConnection.close(rs, pstmt, conn);
         }
+
+        return student;
     }
 }
