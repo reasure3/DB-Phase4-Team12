@@ -3,6 +3,8 @@
 
 해당 문서는 [종벌님의 티스토리 블로그](https://jong-bae.tistory.com/53)를 참고하여 작성되었습니다.
 
+JUnit 추가 부분은 [JAsmine_log](https://velog.io/@jasmine_s2/Java-IntelliJ-JUnit)를 참고햐여 작성되었습니다.
+
 ## 1. 프로젝트 임포트하기
 1. Intellij에서 `DB-Phase4-Team12` 프로젝트를 열기
 2. `File → New → Module from Existing Sources...`
@@ -29,12 +31,17 @@
    - `org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v10.1`
    - `org.eclipse.jst.j2ee.internal.web.container`
    - `org.eclipse.jst.j2ee.internal.module.container`
+   - `org.eclipse.jdt.junit.JUNIT_CONTAINER/6`
 5. Tomcat 추가 (목록에 없는 경우): `'+' → 2 Library... → Application Server Libraries`에서
    <br>(예)`Tomcat 10.1.48` 선택 후 `ADD SELECTED`
 6. ojdbc11.jar 추가 (목록에 없는 경우): `'+' → 2 Library... → Project Libraries`에서
   <br>(예) `ojdbc11` 선택 후 `ADD SELECTED`
 7. __6번에서 `Project Libraries` 또는 `ojdbc`가 없는 경우에만:__
   <br>`'+' → 1 JARs or Directories...` → 파일탐색기에서 `odjbc11.jar` 선택
+8. JUnit6 추가: `'+' → 2 Library... → New Library → From Maven...` 에서
+  <br>`org.junit.jupiter:junit-jupiter:6.0.0` 입력 후 `OK`
+9. 위 방법이 안되면 테스트 클래스 아무거나 들어가서 빨간 에러에서
+  <br>ALE+ENTER → `Add 'JUnit6' to classpath`
 
 ## 5. Facet 추가
 1. `File → Project Structure... → Facets → '+' → Web`
@@ -48,6 +55,12 @@
 1. `File → Project Structure... → Artifacts → '+'`
 2. `Web Application: Exploded > → From Modules...`
 3. 현재 프로젝트(`ProjectDBPhase4`) 선택 → `OK`
+
+## 7. Test 소스 마크
+1. `File → Project Structure... → Modules`
+2. 현재 프로젝트(`ProjectDBPhase4`) 선택
+3. `Sources` 버튼 항목 선택
+4. `src/test` 선택 후 `Mark as:`를 `Tests`로 선택
 
 ## 7. 프로젝트 빌드 (이후 실행때는 필요 없음)
 1. `Build → Build Project`
@@ -63,4 +76,4 @@
 
 
 ---
-마지막 수정: 2025-12-04
+마지막 수정: 2025-12-06
