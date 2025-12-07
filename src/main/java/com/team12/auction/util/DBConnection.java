@@ -3,9 +3,9 @@ package com.team12.auction.util;
 import java.sql.*;
 
 public class DBConnection {
-    private static final String URL = "jdbc:oracle:thin:@localhost:1521:orcl";
-    private static final String USER = "course_registration";
-    private static final String PASSWORD = "oracle";
+    private static final String URL = "jdbc:oracle:thin:@localhost:1521/orclpdb";
+    private static final String USER = "university";
+    private static final String PASSWORD = "comp322";
 
 
     static {
