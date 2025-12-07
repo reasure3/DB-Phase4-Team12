@@ -219,3 +219,120 @@ body {
     color: #666;
     font-size: 14px;
 }
+/* ========== 공통 버튼 ========== */
+.btn-primary,
+.btn-secondary,
+.btn-disabled {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+    background-color: #e6e6e6;
+}
+
+.btn-disabled {
+    background-color: #ddd;
+    color: #777;
+    cursor: not-allowed;
+}
+
+/* ========== 페이지 액션 영역 ========== */
+.page-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filters input,
+.filters select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.summary-text {
+    font-size: 15px;
+    color: #444;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* ========== 테이블 스타일 ========== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px;
+    border: 1px solid #eee;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* ========== 배지 스타일 ========== */
+.badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.badge.success {
+    background-color: #4CAF50;
+}
+
+.badge.warning {
+    background-color: #f6a609;
+}
+
+.badge.danger {
+    background-color: #d32f2f;
+}
