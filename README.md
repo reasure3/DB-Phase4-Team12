@@ -36,12 +36,32 @@ Eclipse IDE를 사용하는 것을 권장합니다.
 http://localhost:8080/ProjectDBPhase4/main.jsp
 ```
 
-### 4. 문제 해결 팁
+### 5. 데이터베이스 설정
+1. `src/main/resources/db.properties.example` 파일을 복사하여 `db.properties` 생성
+생성 후 모습: `src/main/resources/db.properties`
+```bash
+   cp src/main/resources/db.properties.example src/main/resources/db.properties
+```
+* 만약 `db.properties` 파일이 이미 존재하면 다음 단계로 넘어가주세요.
+
+2. `db.properties` 파일을 본인의 Oracle 환경에 맞게 수정
+```properties
+   db.url=jdbc:oracle:thin:@localhost:1521:orclpdb
+   db.user=course_registration
+   db.password=oracle
+```
+
+- `orclpdb`: 본인의 Oracle SID 또는 서비스명 (예: `orcl`, `xe`, `orclpdb` 등)
+- `course_registration`: 본인의 Oracle 사용자명
+- `oracle`: 본인의 비밀번호
+
+> **주의:** `db.properties` 파일은 `.gitignore`에 포함되어 Git에 업로드되지 않습니다. 각자 로컬 환경에 맞게 설정하세요.
+
+### 5. 문제 해결 팁
 - **JSP가 404/서버에서 보이지 않을 때:** Web Resource Directory가 올바르게 설정되었는지 확인
 - **라이브러리 클래스가 없음(ClassNotFound):** `ojdbc11.jar` 경로 확인
 - **Eclipse → IntelliJ 변환 후 빌드 에러:** 프로젝트 SDK/Language level 확인, 인코딩(UTF-8) 확인
-
-
+- **DB 연결 실패:** `src/main/resources/db.properties` 파일이 존재하는지, Oracle SID/서비스명이 올바른지 확인
 
 ---
 마지막 수정: 2025-12-04
