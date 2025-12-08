@@ -3,6 +3,7 @@
 # 추가로 필요한 것들만 정리함
 
 src/main/resources/db.properties
+lib/ojdbc*.jar
 
 ############################################
 # IDE 관련
