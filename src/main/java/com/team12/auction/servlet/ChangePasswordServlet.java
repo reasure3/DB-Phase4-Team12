@@ -113,7 +113,7 @@ public class ChangePasswordServlet extends HttpServlet {
                 // Log the action
                 Log log = new Log();
                 log.setActionType("PASSWORD_CHANGE");
-                log.setDetails("비밀번호 변경");
+                log.setDetails("Student " + studentId + " changed password");
                 log.setStudentId(studentId);
                 log.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
                 logDAO.insertLog(log);

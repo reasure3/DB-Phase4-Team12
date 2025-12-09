@@ -55,4 +55,13 @@ public class Student {
                 ", maxPoint=" + maxPoint +
                 '}';
     }
+
+    public String info() {
+        return "Student{" +
+                "studentId=" + studentId +
+                ", name='" + name + '\'' +
+                ", department='" + department + '\'' +
+                ", grade=" + grade +
+                '}';
+    }
 }

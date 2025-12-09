@@ -1,6 +1,8 @@
 package com.team12.auction.servlet;
 
+import com.team12.auction.dao.LogDAO;
 import com.team12.auction.dao.StudentDAO;
+import com.team12.auction.model.entity.Log;
 import com.team12.auction.model.entity.Student;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,16 +14,20 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.Serial;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @WebServlet("/auth/login")
 public class LoginServlet extends HttpServlet {
 	@Serial private static final long serialVersionUID = -1705710102025229792L;
 
 	private StudentDAO studentDAO;
+    private LogDAO logDAO;
 
     @Override
     public void init() throws ServletException {
         studentDAO = new StudentDAO();
+        logDAO = new LogDAO();
     }
 
     @Override
@@ -59,6 +65,13 @@ public class LoginServlet extends HttpServlet {
                 HttpSession session = request.getSession();
                 session.setAttribute("studentId", student.getStudentId());
                 session.setAttribute("studentName", student.getName());
+
+                Log log = new Log();
+                log.setActionType("LOGIN");
+                log.setDetails("Student " + studentId + " login");
+                log.setStudentId(studentId);
+                log.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+                logDAO.insertLog(log);
 
                 // main.jsp로 리다이렉트
                 response.sendRedirect(request.getContextPath() + "/main.jsp");

@@ -121,7 +121,7 @@ public class EditProfileServlet extends HttpServlet {
                 // Log the action
                 Log log = new Log();
                 log.setActionType("PROFILE_UPDATE");
-                log.setDetails("프로필 정보 수정");
+                log.setDetails("Student " + studentId + " profile updated: " + student.info());
                 log.setStudentId(studentId);
                 log.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
                 logDAO.insertLog(log);
