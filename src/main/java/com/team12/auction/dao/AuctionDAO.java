@@ -76,7 +76,7 @@ public class AuctionDAO {
                                 + "JOIN BasketItem bi ON bi.section_id = a.section_id "
                                 + "JOIN Basket ba ON ba.basket_id = bi.basket_id "
                                 + "LEFT JOIN BID b ON b.auction_id = a.auction_id AND b.student_id = ? "
-                                + "WHERE ba.student_id = ? " + "  AND a.status = 'COMPLETED' "
+                                + "WHERE ba.student_id = ? " + "  AND a.status IN ('ACTIVE', 'COMPLETED') "
                                 + "ORDER BY a.start_time DESC";
 
 		Map<AuctionDetail, Bid> auctionBidMap = new HashMap<>();
@@ -146,8 +146,9 @@ public class AuctionDAO {
 
 		try {
 			conn = DBConnection.getConnection();
-			pstmt = conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
+                        pstmt = conn.prepareStatement(sql);
+                        pstmt.setString(1, auctionId);
+                        rs = pstmt.executeQuery();
 
 			if (rs.next()) {
 				AuctionDetail auction = new AuctionDetail();

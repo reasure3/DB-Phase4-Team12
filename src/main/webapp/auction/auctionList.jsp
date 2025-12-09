@@ -88,7 +88,7 @@
                                                 : "미선정"; %>
                                         <% String bidClass = "합격".equals(bidResult) ? "success" : "danger"; %>
                                         <tr>
-                                                <td><%= auction.getAuctionId() %></td>
+                                                <td><a href="<%=request.getContextPath()%>/auction/bid?auctionId=<%= auction.getAuctionId() %>"><%= auction.getAuctionId() %></a></td>
                                                 <td><%= auction.getCourseId() %></td>
                                                 <td><%= auction.getSectionNumber() %>분반</td>
                                                 <td><%= auction.getCourseName() %></td>
