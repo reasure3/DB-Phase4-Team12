@@ -248,13 +248,14 @@ public class BasketDAO {
      */
     public List<BasketItemDetail> getMyBasket(int studentId) throws SQLException {
         String sql = "SELECT s.section_id, s.section_number, s.professor, " +
-                "s.capacity, s.classroom, s.course_id, c.course_name " +
+                "s.capacity, s.classroom, s.course_id, c.course_name, c.credits, " +
+                "bi.status, bi.reason, bi.registration_time, bi.processed_time " +
                 "FROM Basket b " +
                 "JOIN BasketItem bi ON b.basket_id = bi.basket_id " +
                 "JOIN Section s ON bi.section_id = s.section_id " +
                 "JOIN Course c ON s.course_id = c.course_id " +
                 "WHERE b.student_id = ? " +
-                "ORDER BY s.section_id DESC";
+                "ORDER BY bi.registration_time DESC";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -277,6 +278,11 @@ public class BasketDAO {
                 item.setClassroom(rs.getString(5));
                 item.setCourseId(rs.getString(6));
                 item.setCourseName(rs.getString(7));
+                item.setCredits(rs.getInt(8));
+                item.setStatus(rs.getString(9));
+                item.setReason(rs.getString(10));
+                item.setRegistrationTime(rs.getTimestamp(11));
+                item.setProcessedTime(rs.getTimestamp(12));
                 list.add(item);
             }
 
