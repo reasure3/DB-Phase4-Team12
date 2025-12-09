@@ -28,12 +28,12 @@
         </div>
 
         <div class="menu-grid">
-            <a href="<%=request.getContextPath()%>/section/sectionList.jsp" class="menu-card">
+            <a href="<%=request.getContextPath()%>/section/list" class="menu-card">
                 <h3>강의 조회</h3>
                 <p>전체 강의를 조회하세요</p>
             </a>
 
-            <a href="<%=request.getContextPath()%>/basket/myBasket.jsp" class="menu-card">
+            <a href="<%=request.getContextPath()%>/basket/list" class="menu-card">
                 <h3>수강꾸러미</h3>
                 <p>나의 수강꾸러미를 관리하세요</p>
             </a>

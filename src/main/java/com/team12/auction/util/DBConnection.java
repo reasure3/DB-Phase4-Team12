@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.Properties;
 
 public class DBConnection {
+
     private static final String DEFAULT_URL = "jdbc:oracle:thin:@localhost:1521:orcl";
     private static final String DEFAULT_USER = "course_registration";
     private static final String DEFAULT_PASSWORD = "oracle";
