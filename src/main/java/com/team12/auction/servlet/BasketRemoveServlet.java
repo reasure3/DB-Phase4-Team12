@@ -13,44 +13,45 @@ import java.sql.SQLException;
 
 @WebServlet("/basket/remove")
 public class BasketRemoveServlet extends HttpServlet {
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        HttpSession session = request.getSession(false);
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		HttpSession session = request.getSession(false);
 
-        if (session == null || session.getAttribute("studentId") == null) {
-            response.sendRedirect(request.getContextPath() + "/auth/login");
-            return;
-        }
+		if (session == null || session.getAttribute("studentId") == null) {
+			response.sendRedirect(request.getContextPath() + "/auth/login");
+			return;
+		}
 
-        int studentId = (Integer) session.getAttribute("studentId");
-        String sectionId = request.getParameter("sectionId");
-        String returnUrl = request.getParameter("returnUrl");
-        if (returnUrl == null || returnUrl.isBlank()) {
-            returnUrl = request.getContextPath() + "/basket/myBasket.jsp";
-        }
+		int studentId = (Integer) session.getAttribute("studentId");
+		String sectionId = request.getParameter("sectionId");
+		String returnUrl = request.getParameter("returnUrl");
+		if (returnUrl == null || returnUrl.isBlank()) {
+			returnUrl = request.getContextPath() + "/basket/list";
+		}
 
-        if (sectionId == null || sectionId.isBlank()) {
-            session.setAttribute("errorMessage", "삭제할 분반 정보가 없습니다.");
-            response.sendRedirect(returnUrl);
-            return;
-        }
+		if (sectionId == null || sectionId.isBlank()) {
+			session.setAttribute("errorMessage", "삭제할 분반 정보가 없습니다.");
+			response.sendRedirect(returnUrl);
+			return;
+		}
 
-        BasketDAO basketDAO = new BasketDAO();
+		BasketDAO basketDAO = new BasketDAO();
 
-        try {
-            basketDAO.ensureBasketExists(studentId);
-            int deleted = basketDAO.deleteSectionFromBasket(studentId, sectionId);
-            if (deleted > 0) {
-                session.setAttribute("successMessage", "수강꾸러미에서 분반을 삭제했습니다.");
-            } else {
-                session.setAttribute("errorMessage", "장바구니에 존재하지 않는 분반입니다.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            session.setAttribute("errorMessage", "삭제 중 오류가 발생했습니다: " + e.getMessage());
-        }
+		try {
+			basketDAO.ensureBasketExists(studentId);
+			int deleted = basketDAO.deleteSectionFromBasket(studentId, sectionId);
+			if (deleted > 0) {
+				session.setAttribute("successMessage", "수강꾸러미에서 분반을 삭제했습니다.");
+			} else {
+				session.setAttribute("errorMessage", "장바구니에 존재하지 않는 분반입니다.");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			session.setAttribute("errorMessage", "삭제 중 오류가 발생했습니다: " + e.getMessage());
+		}
 
-        response.sendRedirect(returnUrl);
-    }
+		response.sendRedirect(returnUrl);
+	}
 }

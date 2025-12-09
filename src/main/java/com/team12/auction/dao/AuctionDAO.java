@@ -14,202 +14,189 @@ import java.util.List;
 import java.util.Map;
 
 public class AuctionDAO {
-    /**
-     * 학과별 경매 조회 (ACTIVE 또는 COMPLETED 상태)
-     */
-    public List<AuctionDetail> selectByDepartment(String department) throws SQLException {
-        String sql = "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, " +
-                "       a.created_at, a.section_id, " +
-                "       s.section_number, s.professor, " +
-                "       c.course_id, c.course_name, c.department, c.credits " +
-                "FROM AUCTION a " +
-                "JOIN SECTION s ON a.section_id = s.section_id " +
-                "JOIN COURSE c ON s.course_id = c.course_id " +
-                "WHERE c.department = ? " +
-                "  AND a.status IN ('ACTIVE', 'COMPLETED') " +
-                "ORDER BY a.start_time DESC";
+	/**
+	 * 학과별 경매 조회 (ACTIVE 또는 COMPLETED 상태)
+	 */
+	public List<AuctionDetail> selectByDepartment(String department) throws SQLException {
+		String sql = "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, "
+				+ "       a.created_at, a.section_id, " + "       s.section_number, s.professor, "
+				+ "       c.course_id, c.course_name, c.department, c.credits " + "FROM AUCTION a "
+				+ "JOIN SECTION s ON a.section_id = s.section_id " + "JOIN COURSE c ON s.course_id = c.course_id "
+				+ "WHERE c.department = ? " + "  AND a.status IN ('ACTIVE', 'COMPLETED') "
+				+ "ORDER BY a.start_time DESC";
 
-        List<AuctionDetail> auctions = new ArrayList<>();
+		List<AuctionDetail> auctions = new ArrayList<>();
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-        try {
-            conn = DBConnection.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, department);
-            rs = pstmt.executeQuery();
+		try {
+			conn = DBConnection.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, department);
+			rs = pstmt.executeQuery();
 
-            while (rs.next()) {
-                AuctionDetail auction = new AuctionDetail();
-                auction.setAuctionId(rs.getString(1));
-                auction.setStartTime(rs.getDate(2));
-                auction.setEndTime(rs.getDate(3));
-                auction.setStatus(rs.getString(4));
-                auction.setAvailableSlots(rs.getInt(5));
-                auction.setCreatedAt(rs.getDate(6));
-                auction.setSectionId(rs.getString(7));
-                auction.setSectionNumber(rs.getInt(8));
-                auction.setProfessor(rs.getString(9));
-                auction.setCourseId(rs.getString(10));
-                auction.setCourseName(rs.getString(11));
-                auction.setDepartment(rs.getString(12));
-                auction.setCredits(rs.getInt(13));
-                auctions.add(auction);
-            }
-            rs.close();
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
-        }
+			while (rs.next()) {
+				AuctionDetail auction = new AuctionDetail();
+				auction.setAuctionId(rs.getString(1));
+				auction.setStartTime(rs.getDate(2));
+				auction.setEndTime(rs.getDate(3));
+				auction.setStatus(rs.getString(4));
+				auction.setAvailableSlots(rs.getInt(5));
+				auction.setCreatedAt(rs.getDate(6));
+				auction.setSectionId(rs.getString(7));
+				auction.setSectionNumber(rs.getInt(8));
+				auction.setProfessor(rs.getString(9));
+				auction.setCourseId(rs.getString(10));
+				auction.setCourseName(rs.getString(11));
+				auction.setDepartment(rs.getString(12));
+				auction.setCredits(rs.getInt(13));
+				auctions.add(auction);
+			}
+			rs.close();
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
 
-        return auctions;
-    }
+		return auctions;
+	}
 
-    /**
-     * 나의 경매 조회 (참여 가능한 모든 경매 + 내 입찰 정보)
-     * 입찰했으면 입찰 금액 표시, 안 했으면 0 표시
-     */
-    public Map<AuctionDetail, Bid> selectMyAuctions(int studentId) throws SQLException {
-        String sql = "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, " +
-                "       a.created_at, a.section_id, " +
-                "       s.section_number, s.professor, " +
-                "       c.course_id, c.course_name, c.department, c.credits, " +
-                "       b.bid_amount, b.is_successful " +
-                "FROM AUCTION a " +
-                "JOIN SECTION s ON a.section_id = s.section_id " +
-                "JOIN COURSE c ON s.course_id = c.course_id " +
-                "LEFT JOIN BID b ON b.auction_id = a.auction_id AND b.student_id = ? " +  // LEFT JOIN
-                "WHERE a.status = 'COMPLETED' " +
-                "ORDER BY a.start_time DESC";
+	/**
+	 * 나의 경매 조회 (참여 가능한 모든 경매 + 내 입찰 정보) 입찰했으면 입찰 금액 표시, 안 했으면 0 표시
+	 */
+	public Map<AuctionDetail, Bid> selectMyAuctions(int studentId) throws SQLException {
+		String sql = "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, "
+				+ "       a.created_at, a.section_id, " + "       s.section_number, s.professor, "
+				+ "       c.course_id, c.course_name, c.department, c.credits, "
+				+ "       b.bid_amount, b.is_successful " + "FROM AUCTION a "
+				+ "JOIN SECTION s ON a.section_id = s.section_id " + "JOIN COURSE c ON s.course_id = c.course_id "
+				+ "LEFT JOIN BID b ON b.auction_id = a.auction_id AND b.student_id = ? " + // LEFT JOIN
+				"WHERE a.status = 'COMPLETED' " + "ORDER BY a.start_time DESC";
 
-        Map<AuctionDetail, Bid> auctionBidMap = new HashMap<>();
+		Map<AuctionDetail, Bid> auctionBidMap = new HashMap<>();
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-        try {
-            conn = DBConnection.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, studentId);
-            rs = pstmt.executeQuery();
+		try {
+			conn = DBConnection.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, studentId);
+			rs = pstmt.executeQuery();
 
-            while (rs.next()) {
-                // Auction 객체 생성
-                AuctionDetail auction = new AuctionDetail();
-                auction.setAuctionId(rs.getString(1));
-                auction.setStartTime(rs.getDate(2));
-                auction.setEndTime(rs.getDate(3));
-                auction.setStatus(rs.getString(4));
-                auction.setAvailableSlots(rs.getInt(5));
-                auction.setCreatedAt(rs.getDate(6));
-                auction.setSectionId(rs.getString(7));
-                auction.setSectionNumber(rs.getInt(8));
-                auction.setProfessor(rs.getString(9));
-                auction.setCourseId(rs.getString(10));
-                auction.setCourseName(rs.getString(11));
-                auction.setDepartment(rs.getString(12));
-                auction.setCredits(rs.getInt(13));
+			while (rs.next()) {
+				// Auction 객체 생성
+				AuctionDetail auction = new AuctionDetail();
+				auction.setAuctionId(rs.getString(1));
+				auction.setStartTime(rs.getDate(2));
+				auction.setEndTime(rs.getDate(3));
+				auction.setStatus(rs.getString(4));
+				auction.setAvailableSlots(rs.getInt(5));
+				auction.setCreatedAt(rs.getDate(6));
+				auction.setSectionId(rs.getString(7));
+				auction.setSectionNumber(rs.getInt(8));
+				auction.setProfessor(rs.getString(9));
+				auction.setCourseId(rs.getString(10));
+				auction.setCourseName(rs.getString(11));
+				auction.setDepartment(rs.getString(12));
+				auction.setCredits(rs.getInt(13));
 
-                // Bid 객체 생성 (입찰 안 했으면 null 처리)
-                Bid myBid = new Bid();
-                if (rs.getObject(14) != null) {  // bid_amount가 null이 아니면
-                    myBid.setBidAmount(rs.getInt(14));
-                    myBid.setIsSuccessful(rs.getString(15));
-                } else {
-                    myBid.setBidAmount(0);                       // 입찰 안 함
-                    myBid.setIsSuccessful("N");
-                }
+				// Bid 객체 생성 (입찰 안 했으면 null 처리)
+				Bid myBid = new Bid();
+				if (rs.getObject(14) != null) { // bid_amount가 null이 아니면
+					myBid.setBidAmount(rs.getInt(14));
+					myBid.setIsSuccessful(rs.getString(15));
+				} else {
+					myBid.setBidAmount(0); // 입찰 안 함
+					myBid.setIsSuccessful("N");
+				}
 
-                auctionBidMap.put(auction, myBid);
-            }
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
-        }
+				auctionBidMap.put(auction, myBid);
+			}
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
 
-        return auctionBidMap;
-    }
+		return auctionBidMap;
+	}
 
-    /**
-     * 경매 ID로 조회
-     */
-    public AuctionDetail selectById(String auctionId) throws SQLException {
-        String sql =
-                "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, " +
-                        "       a.created_at, a.section_id, " +
-                        "       s.section_number, s.professor, s.capacity, " +
-                        "       c.course_id, c.course_name, c.department, c.credits " +
-                        "FROM AUCTION a " +
-                        "JOIN SECTION s ON a.section_id = s.section_id " +
-                        "JOIN COURSE c ON s.course_id = c.course_id " +
-                        "WHERE a.auction_id = ?";
+	/**
+	 * 경매 ID로 조회
+	 */
+	public AuctionDetail selectById(String auctionId) throws SQLException {
+		String sql = "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, "
+				+ "       a.created_at, a.section_id, " + "       s.section_number, s.professor, s.capacity, "
+				+ "       c.course_id, c.course_name, c.department, c.credits " + "FROM AUCTION a "
+				+ "JOIN SECTION s ON a.section_id = s.section_id " + "JOIN COURSE c ON s.course_id = c.course_id "
+				+ "WHERE a.auction_id = ?";
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-        try {
-            conn = DBConnection.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
+		try {
+			conn = DBConnection.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                AuctionDetail auction = new AuctionDetail();
-                auction.setAuctionId(rs.getString(1));
-                auction.setStartTime(rs.getDate(2));
-                auction.setEndTime(rs.getDate(3));
-                auction.setStatus(rs.getString(4));
-                auction.setAvailableSlots(rs.getInt(5));
-                auction.setCreatedAt(rs.getDate(6));
-                auction.setSectionId(rs.getString(7));
-                auction.setSectionNumber(rs.getInt(8));
-                auction.setProfessor(rs.getString(9));
-                auction.setCourseId(rs.getString(11));
-                auction.setCourseName(rs.getString(12));
-                auction.setDepartment(rs.getString(13));
-                auction.setCredits(rs.getInt(14));
-                return auction;
-            }
-            rs.close();
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
-        }
-        return null;
-    }
+			if (rs.next()) {
+				AuctionDetail auction = new AuctionDetail();
+				auction.setAuctionId(rs.getString(1));
+				auction.setStartTime(rs.getDate(2));
+				auction.setEndTime(rs.getDate(3));
+				auction.setStatus(rs.getString(4));
+				auction.setAvailableSlots(rs.getInt(5));
+				auction.setCreatedAt(rs.getDate(6));
+				auction.setSectionId(rs.getString(7));
+				auction.setSectionNumber(rs.getInt(8));
+				auction.setProfessor(rs.getString(9));
+				auction.setCourseId(rs.getString(11));
+				auction.setCourseName(rs.getString(12));
+				auction.setDepartment(rs.getString(13));
+				auction.setCredits(rs.getInt(14));
+				return auction;
+			}
+			rs.close();
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
+		return null;
+	}
 
-    /**
-     * 경매 존재 여부 확인
-     */
-    public boolean existsById(String auctionId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM AUCTION WHERE auction_id = ?";
+	/**
+	 * 경매 존재 여부 확인
+	 */
+	public boolean existsById(String auctionId) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM AUCTION WHERE auction_id = ?";
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-        try {
-            conn = DBConnection.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, auctionId);
-            rs = pstmt.executeQuery();
+		try {
+			conn = DBConnection.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, auctionId);
+			rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
+			if (rs.next()) {
+				return rs.getInt(1) > 0;
+			}
 
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
-        }
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
 
-        return false;
-    }
+		return false;
+	}
 }

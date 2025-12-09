@@ -12,22 +12,24 @@ import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/auth/logout")
 public class LogoutServlet extends HttpServlet {
-	@Serial private static final long serialVersionUID = -6317185385750980605L;
+	@Serial
+	private static final long serialVersionUID = -6317185385750980605L;
 
 	@Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // 세션 무효화
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		// 세션 무효화
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
 
-        // 로그인 페이지로 리다이렉트
-        response.sendRedirect(request.getContextPath() + "/auth/login");
-    }
+		// 로그인 페이지로 리다이렉트
+		response.sendRedirect(request.getContextPath() + "/auth/login");
+	}
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doGet(request, response);
-    }
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request, response);
+	}
 }

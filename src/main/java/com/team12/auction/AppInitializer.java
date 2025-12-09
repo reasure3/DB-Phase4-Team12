@@ -7,13 +7,13 @@ import jakarta.servlet.annotation.WebListener;
 
 @WebListener
 public class AppInitializer implements ServletContextListener {
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        System.out.println("App Initializer Started");
-        try {
-            DBConnection.init();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	@Override
+	public void contextInitialized(ServletContextEvent sce) {
+		System.out.println("App Initializer Started");
+		try {
+			DBConnection.init();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

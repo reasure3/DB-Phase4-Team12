@@ -5,21 +5,22 @@ import java.sql.Date;
 import com.team12.auction.model.entity.Auction;
 
 public class AuctionDetail extends Auction {
-    // JOIN으로 가져올 추가 정보
-    private String courseId;
-    private String courseName;
-    private String department;
-    private int credits;
-    private int sectionNumber;
-    private String professor;
+	// JOIN으로 가져올 추가 정보
+	private String courseId;
+	private String courseName;
+	private String department;
+	private int credits;
+	private int sectionNumber;
+	private String professor;
 
-    public AuctionDetail() {}
+	public AuctionDetail() {
+	}
 
-    public AuctionDetail(String auctionId, Date startTime, Date endTime,
-                   String status, int availableSlots, Date createdAt, String sectionId) {
-        super(auctionId, startTime, endTime, status, availableSlots, createdAt, sectionId);
-    }
-    
+	public AuctionDetail(String auctionId, Date startTime, Date endTime, String status, int availableSlots,
+			Date createdAt, String sectionId) {
+		super(auctionId, startTime, endTime, status, availableSlots, createdAt, sectionId);
+	}
+
 	public String getCourseId() {
 		return courseId;
 	}

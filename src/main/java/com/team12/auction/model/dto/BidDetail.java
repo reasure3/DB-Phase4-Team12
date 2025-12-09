@@ -5,18 +5,19 @@ import java.sql.Date;
 import com.team12.auction.model.entity.Bid;
 
 public class BidDetail extends Bid {
-    // JOIN으로 가져올 추가 정보
-    private String studentName;
-    private String courseName;
-    private String sectionId;
-	
-    public BidDetail() {}
+	// JOIN으로 가져올 추가 정보
+	private String studentName;
+	private String courseName;
+	private String sectionId;
 
-    public BidDetail(String bidSequence, int bidAmount, Date bidTime,
-               String isSuccessful, String auctionId, int studentId) {
-        super(bidSequence, bidAmount, bidTime, isSuccessful, auctionId, studentId);
-    }
-    
+	public BidDetail() {
+	}
+
+	public BidDetail(String bidSequence, int bidAmount, Date bidTime, String isSuccessful, String auctionId,
+			int studentId) {
+		super(bidSequence, bidAmount, bidTime, isSuccessful, auctionId, studentId);
+	}
+
 	public String getStudentName() {
 		return studentName;
 	}

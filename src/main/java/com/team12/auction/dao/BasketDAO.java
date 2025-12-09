@@ -11,352 +11,269 @@ import com.team12.auction.model.dto.BasketItemDetail;
 import com.team12.auction.util.DBConnection;
 
 public class BasketDAO {
-    /**
-     * 학생의 장바구니가 없으면 생성 (basket_id = 'B' + studentId)
-     */
+	/**
+	 * 학생의 장바구니가 없으면 생성 (basket_id = 'B' + studentId)
+	 */
 	public void ensureBasketExists(int studentId) throws SQLException {
-	    Connection conn = null;
-	    PreparedStatement pstmt = null;
-	    ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 
-	    try {
-	        conn = DBConnection.getConnection();
+		try {
+			conn = DBConnection.getConnection();
 
-	        // 1. 이 학생의 장바구니가 이미 있는지 확인
-	        String selectSql = "SELECT basket_id FROM Basket WHERE student_id = ?";
-	        pstmt = conn.prepareStatement(selectSql);
-	        pstmt.setInt(1, studentId);
-	        rs = pstmt.executeQuery();
+			// 1. 이 학생의 장바구니가 이미 있는지 확인
+			String selectSql = "SELECT basket_id FROM Basket WHERE student_id = ?";
+			pstmt = conn.prepareStatement(selectSql);
+			pstmt.setInt(1, studentId);
+			rs = pstmt.executeQuery();
 
-	        if (rs.next()) {
-	            // 이미 장바구니가 있으면, 기존 basket_id 는 그대로 두고 바로 종료
-	            return;
-	        }
-	        rs.close();
-	        pstmt.close();
+			if (rs.next()) {
+				// 이미 장바구니가 있으면, 기존 basket_id 는 그대로 두고 바로 종료
+				return;
+			}
+			rs.close();
+			pstmt.close();
 
-	        // 2. 장바구니가 없다면 새로 생성
-	        String studentIdStr = String.valueOf(studentId); // 예: 2025111482
-	        if (studentIdStr.length() > 9) {
-	            studentIdStr = studentIdStr.substring(0, 9); // 앞 9자리만 사용 -> 202511148
-	        }
-	        String newBasketId = "B" + studentIdStr; // -> B202511148
+			// 2. 장바구니가 없다면 새로 생성
+			String studentIdStr = String.valueOf(studentId); // 예: 2025111482
+			if (studentIdStr.length() > 9) {
+				studentIdStr = studentIdStr.substring(0, 9); // 앞 9자리만 사용 -> 202511148
+			}
+			String newBasketId = "B" + studentIdStr; // -> B202511148
 
-	        String insertSql = "INSERT INTO Basket (basket_id, student_id) VALUES (?, ?)";
-	        pstmt = conn.prepareStatement(insertSql);
-	        pstmt.setString(1, newBasketId);
-	        pstmt.setInt(2, studentId);
-	        pstmt.executeUpdate();
+			String insertSql = "INSERT INTO Basket (basket_id, student_id) VALUES (?, ?)";
+			pstmt = conn.prepareStatement(insertSql);
+			pstmt.setString(1, newBasketId);
+			pstmt.setInt(2, studentId);
+			pstmt.executeUpdate();
 
-	        DBConnection.commit(conn);
+			DBConnection.commit(conn);
 
-	    } catch (SQLException e) {
-	        DBConnection.rollback(conn);
-	        throw e;
-	    } finally {
-	        DBConnection.close(rs, pstmt, conn);
-	    }
+		} catch (SQLException e) {
+			DBConnection.rollback(conn);
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
 	}
 
-    /**
-     * 해당 분반이 이미 장바구니에 있는지 확인
-     */
-    public boolean isSectionInBasket(int studentId, String sectionId) throws SQLException {
-        String basketId = getBasketId(studentId);
-        if (basketId == null) {
-            return false;
-        }
-        String sql = "SELECT COUNT(*) " +
-                "FROM BasketItem " +
-                "WHERE basket_id = ? AND section_id = ?";
+	/**
+	 * 해당 분반이 이미 장바구니에 있는지 확인
+	 */
+	public boolean isSectionInBasket(int studentId, String sectionId) throws SQLException {
+		String basketId = getBasketId(studentId);
+		if (basketId == null) {
+			return false;
+		}
+		String sql = "SELECT COUNT(*) " + "FROM BasketItem " + "WHERE basket_id = ? AND section_id = ?";
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        boolean exists = false;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		boolean exists = false;
 
-        try {
-            conn = DBConnection.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, basketId);
-            pstmt.setString(2, sectionId);
+		try {
+			conn = DBConnection.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, basketId);
+			pstmt.setString(2, sectionId);
 
-            rs = pstmt.executeQuery();
+			rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                exists = rs.getInt(1) > 0;
-            }
+			if (rs.next()) {
+				exists = rs.getInt(1) > 0;
+			}
 
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
-        }
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
 
-        return exists;
-    }
+		return exists;
+	}
 
-    /**
-     * 장바구니에 분반 추가
-     */
-    public boolean addSectionToBasket(int studentId, String sectionId) throws SQLException {
-        String basketId = getBasketId(studentId);
-        if (basketId == null) {
-            throw new SQLException("장바구니 ID를 찾을 수 없습니다.");
-        }
+	/**
+	 * 현재 장바구니에 담긴 과목들의 총 학점 계산
+	 */
+	public int getTotalCreditsInBasket(int studentId) throws SQLException {
+		String basketId = getBasketId(studentId);
+		if (basketId == null) {
+			return 0;
+		}
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        boolean success = false;
+		String sql = "SELECT NVL(SUM(c.credits), 0) AS total_credits " +
+				"FROM BasketItem bi " +
+				"JOIN Section s ON bi.section_id = s.section_id " +
+				"JOIN Course c ON s.course_id = c.course_id " +
+				"WHERE bi.basket_id = ?";
 
-        try {
-            conn = DBConnection.getConnection();
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		int totalCredits = 0;
 
-            // 1. BasketItem에 INSERT
-            String sql = "INSERT INTO BasketItem " +
-                    "(registration_time, status, processed_time, reason, basket_id, section_id) " +
-                    "VALUES (SYSDATE, 'PENDING', NULL, NULL, ?, ?)";
+		try {
+			conn = DBConnection.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, basketId);
 
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, basketId);
-            pstmt.setString(2, sectionId);
-            pstmt.executeUpdate();
-            pstmt.close();
+			rs = pstmt.executeQuery();
 
-            // 2. 정원 확인 및 등록 처리
-            //success = processCapacityAndMaybeEnroll(conn, studentId, basketId, sectionId);
+			if (rs.next()) {
+				totalCredits = rs.getInt(1);
+			}
 
-            DBConnection.commit(conn);
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
 
-        } catch (SQLException e) {
-            DBConnection.rollback(conn);
-            throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
-        }
+		return totalCredits;
+	}
 
-        return success;
-    }
+	/**
+	 * 장바구니에 분반 추가 (정원 제한 없음)
+	 */
+	public void addSectionToBasket(int studentId, String sectionId) throws SQLException {
+		String basketId = getBasketId(studentId);
+		if (basketId == null) {
+			throw new SQLException("장바구니 ID를 찾을 수 없습니다.");
+		}
 
-    /**
-     * 정원 확인 및 등록 처리
-     * private 메서드이므로 Connection을 파라미터로 받음
-     */
-    private boolean processCapacityAndMaybeEnroll(Connection conn, int studentId, String basketId, String sectionId) throws SQLException {
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
 
-        try {
-            // 1) 분반 정원 가져오기
-            int capacity = 0;
-            String capSql = "SELECT capacity FROM Section WHERE section_id = ?";
-            pstmt = conn.prepareStatement(capSql);
-            pstmt.setString(1, sectionId);
-            rs = pstmt.executeQuery();
+		try {
+			conn = DBConnection.getConnection();
 
-            if (rs.next()) {
-                capacity = rs.getInt(1);
-            } else {
-                // 존재하지 않는 분반이면 FAILED 처리
-                String upd = "UPDATE BasketItem " +
-                        "SET status = 'FAILED', reason = '존재하지 않는 분반', processed_time = SYSDATE " +
-                        "WHERE basket_id = ? AND section_id = ?";
-                pstmt.close();
-                rs.close();
+			// BasketItem에 INSERT (정원 체크 없이 담기)
+			String sql = "INSERT INTO BasketItem "
+					+ "(registration_time, status, processed_time, reason, basket_id, section_id) "
+					+ "VALUES (SYSDATE, 'PENDING', NULL, NULL, ?, ?)";
 
-                pstmt = conn.prepareStatement(upd);
-                pstmt.setString(1, basketId);
-                pstmt.setString(2, sectionId);
-                pstmt.executeUpdate();
-                pstmt.close();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, basketId);
+			pstmt.setString(2, sectionId);
+			pstmt.executeUpdate();
 
-                throw new SQLException("해당 SECTION_ID를 가진 분반이 없습니다: " + sectionId);
-            }
-            rs.close();
-            pstmt.close();
+			DBConnection.commit(conn);
 
-            // 2) 현재 이 분반에 등록된 인원 수 계산 (Enrollment 기준)
-            int count = 0;
-            String cntSql = "SELECT COUNT(*) FROM Enrollment WHERE section_id = ?";
-            pstmt = conn.prepareStatement(cntSql);
-            pstmt.setString(1, sectionId);
-            rs = pstmt.executeQuery();
+		} catch (SQLException e) {
+			DBConnection.rollback(conn);
+			throw e;
+		} finally {
+			DBConnection.close(pstmt, conn);
+		}
+	}
 
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-            rs.close();
-            pstmt.close();
+	/**
+	 * 로그인한 학생의 수강꾸러미 조회
+	 */
+	public List<BasketItemDetail> getMyBasket(int studentId) throws SQLException {
+		String sql = "SELECT s.section_id, s.section_number, s.professor, "
+				+ "s.capacity, s.classroom, s.course_id, c.course_name, c.credits, "
+				+ "bi.status, bi.reason, bi.registration_time, bi.processed_time, "
+				+ "NVL(basket.basket_count, 0) AS basket_count " + "FROM Basket b "
+				+ "JOIN BasketItem bi ON b.basket_id = bi.basket_id "
+				+ "JOIN Section s ON bi.section_id = s.section_id " + "JOIN Course c ON s.course_id = c.course_id "
+				+ "LEFT JOIN (SELECT section_id, COUNT(*) AS basket_count FROM BasketItem GROUP BY section_id) basket "
+				+ "ON basket.section_id = s.section_id " + "WHERE b.student_id = ? "
+				+ "ORDER BY bi.registration_time DESC";
 
-            // 3) 정원 초과 여부 판단
-            if (count >= capacity) {
-                // 정원 초과 -> FAILED 처리
-                String upd = "UPDATE BasketItem " +
-                        "SET status = 'FAILED', reason = '정원 초과', processed_time = SYSDATE " +
-                        "WHERE basket_id = ? AND section_id = ?";
-                pstmt = conn.prepareStatement(upd);
-                pstmt.setString(1, basketId);
-                pstmt.setString(2, sectionId);
-                pstmt.executeUpdate();
-                pstmt.close();
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<BasketItemDetail> list = new ArrayList<>();
 
-                return false;   // 정원 초과
-            } else {
-                // 정원 내 -> SUCCESS 처리 + ENROLLMENT에 INSERT
-                String upd = "UPDATE BasketItem " +
-                        "SET status = 'SUCCESS', reason = NULL, processed_time = SYSDATE " +
-                        "WHERE basket_id = ? AND section_id = ?";
-                pstmt = conn.prepareStatement(upd);
-                pstmt.setString(1, basketId);
-                pstmt.setString(2, sectionId);
-                pstmt.executeUpdate();
-                pstmt.close();
+		try {
+			conn = DBConnection.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, studentId);
 
-                // enrollment_id 생성
-                String nextIdSql = "SELECT NVL(MAX( " +
-                        "CASE " +
-                        "WHEN REGEXP_LIKE(enrollment_id, '^[0-9]+$') " +
-                        "THEN TO_NUMBER(enrollment_id) " +
-                        "ELSE NULL " +
-                        "END), 0) + 1 AS next_id " +
-                        "FROM Enrollment";
+			rs = pstmt.executeQuery();
 
-                pstmt = conn.prepareStatement(nextIdSql);
-                rs = pstmt.executeQuery();
+			while (rs.next()) {
+				BasketItemDetail item = new BasketItemDetail();
+				item.setSectionId(rs.getString(1));
+				item.setSectionNumber(rs.getInt(2));
+				item.setProfessor(rs.getString(3));
+				item.setCapacity(rs.getInt(4));
+				item.setClassroom(rs.getString(5));
+				item.setCourseId(rs.getString(6));
+				item.setCourseName(rs.getString(7));
+				item.setCredits(rs.getInt(8));
+				item.setStatus(rs.getString(9));
+				item.setReason(rs.getString(10));
+				item.setRegistrationTime(rs.getTimestamp(11));
+				item.setProcessedTime(rs.getTimestamp(12));
+				item.setBasketCount(rs.getInt(13));
+				list.add(item);
+			}
 
-                String nextEnrollmentId = "1";
-                if (rs.next()) {
-                    long nextId = rs.getLong(1);
-                    nextEnrollmentId = String.valueOf(nextId);
-                }
-                rs.close();
-                pstmt.close();
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
 
-                // ENROLLMENT 테이블에 등록
-                String enrSql = "INSERT INTO Enrollment " +
-                        "(enrollment_id, enrollment_source, points_used, enrollment_time, student_id, section_id) " +
-                        "VALUES (?, 'FROM_BASKET', 0, SYSDATE, ?, ?)";
+		return list;
+	}
 
-                pstmt = conn.prepareStatement(enrSql);
-                pstmt.setString(1, nextEnrollmentId);
-                pstmt.setInt(2, studentId);
-                pstmt.setString(3, sectionId);
-                pstmt.executeUpdate();
-                pstmt.close();
+	/**
+	 * 학생의 basket_id 조회
+	 */
+	public String getBasketId(int studentId) throws SQLException {
+		String sql = "SELECT basket_id FROM Basket WHERE student_id = ?";
 
-                return true;    // 성공적으로 등록까지 완료
-            }
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String basketId = null;
 
-        } finally {
-            if (rs != null) rs.close();
-            if (pstmt != null) pstmt.close();
-        }
-    }
+		try {
+			conn = DBConnection.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, studentId);
 
-    /**
-     * 로그인한 학생의 수강꾸러미 조회
-     */
-    public List<BasketItemDetail> getMyBasket(int studentId) throws SQLException {
-        String sql = "SELECT s.section_id, s.section_number, s.professor, " +
-                "s.capacity, s.classroom, s.course_id, c.course_name, c.credits, " +
-                "bi.status, bi.reason, bi.registration_time, bi.processed_time " +
-                "FROM Basket b " +
-                "JOIN BasketItem bi ON b.basket_id = bi.basket_id " +
-                "JOIN Section s ON bi.section_id = s.section_id " +
-                "JOIN Course c ON s.course_id = c.course_id " +
-                "WHERE b.student_id = ? " +
-                "ORDER BY bi.registration_time DESC";
+			rs = pstmt.executeQuery();
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        List<BasketItemDetail> list = new ArrayList<>();
+			if (rs.next()) {
+				basketId = rs.getString(1);
+			}
 
-        try {
-            conn = DBConnection.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, studentId);
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			DBConnection.close(rs, pstmt, conn);
+		}
 
-            rs = pstmt.executeQuery();
+		return basketId;
+	}
 
-            while (rs.next()) {
-                BasketItemDetail item = new BasketItemDetail();
-                item.setSectionId(rs.getString(1));
-                item.setSectionNumber(rs.getInt(2));
-                item.setProfessor(rs.getString(3));
-                item.setCapacity(rs.getInt(4));
-                item.setClassroom(rs.getString(5));
-                item.setCourseId(rs.getString(6));
-                item.setCourseName(rs.getString(7));
-                item.setCredits(rs.getInt(8));
-                item.setStatus(rs.getString(9));
-                item.setReason(rs.getString(10));
-                item.setRegistrationTime(rs.getTimestamp(11));
-                item.setProcessedTime(rs.getTimestamp(12));
-                list.add(item);
-            }
+	/**
+	 * 장바구니에서 분반 삭제 (Enrollment까지 함께 제거)
+	 */
+	public int deleteSectionFromBasket(int studentId, String sectionId) throws SQLException {
+		String basketId = getBasketId(studentId);
+		if (basketId == null)
+			return 0;
 
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
-        }
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		int deletedItems = 0;
 
-        return list;
-    }
+		try {
+			conn = DBConnection.getConnection();
 
-    /**
-     * 학생의 basket_id 조회
-     */
-    public String getBasketId(int studentId) throws SQLException {
-        String sql = "SELECT basket_id FROM Basket WHERE student_id = ?";
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        String basketId = null;
-
-        try {
-            conn = DBConnection.getConnection();
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1, studentId);
-
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                basketId = rs.getString(1);
-            }
-
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
-        }
-
-        return basketId;
-    }
-
-    /**
-     * 장바구니에서 분반 삭제 (Enrollment까지 함께 제거)
-     */
-    public int deleteSectionFromBasket(int studentId, String sectionId) throws SQLException {
-        String basketId = getBasketId(studentId);
-        if (basketId == null) return 0;
-
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        int deletedItems = 0;
-
-        try {
-            conn = DBConnection.getConnection();
-
-            String deleteItemSql = "DELETE FROM BasketItem WHERE basket_id = ? AND section_id = ?";
-            pstmt = conn.prepareStatement(deleteItemSql);
-            pstmt.setString(1, basketId);
-            pstmt.setString(2, sectionId);
-            deletedItems = pstmt.executeUpdate();
-            pstmt.close();
+			String deleteItemSql = "DELETE FROM BasketItem WHERE basket_id = ? AND section_id = ?";
+			pstmt = conn.prepareStatement(deleteItemSql);
+			pstmt.setString(1, basketId);
+			pstmt.setString(2, sectionId);
+			deletedItems = pstmt.executeUpdate();
+			pstmt.close();
 
 //            String deleteEnrollmentSql = "DELETE FROM Enrollment WHERE student_id = ? AND section_id = ?";
 //            pstmt = conn.prepareStatement(deleteEnrollmentSql);
@@ -365,15 +282,15 @@ public class BasketDAO {
 //            pstmt.executeUpdate();
 //            pstmt.close();
 
-            DBConnection.commit(conn);
+			DBConnection.commit(conn);
 
-        } catch (SQLException e) {
-            DBConnection.rollback(conn);
-            throw e;
-        } finally {
-            DBConnection.close(pstmt, conn);
-        }
+		} catch (SQLException e) {
+			DBConnection.rollback(conn);
+			throw e;
+		} finally {
+			DBConnection.close(pstmt, conn);
+		}
 
-        return deletedItems;
-    }
+		return deletedItems;
+	}
 }
