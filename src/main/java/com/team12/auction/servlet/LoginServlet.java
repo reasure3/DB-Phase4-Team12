@@ -1,6 +1,8 @@
 package com.team12.auction.servlet;
 
+import com.team12.auction.dao.LogDAO;
 import com.team12.auction.dao.StudentDAO;
+import com.team12.auction.model.entity.Log;
 import com.team12.auction.model.entity.Student;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,6 +14,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.Serial;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @WebServlet("/auth/login")
 public class LoginServlet extends HttpServlet {
@@ -19,11 +23,13 @@ public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = -1705710102025229792L;
 
 	private StudentDAO studentDAO;
+    private LogDAO logDAO;
 
-	@Override
-	public void init() throws ServletException {
-		studentDAO = new StudentDAO();
-	}
+    @Override
+    public void init() throws ServletException {
+        studentDAO = new StudentDAO();
+        logDAO = new LogDAO();
+    }
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -62,14 +68,21 @@ public class LoginServlet extends HttpServlet {
 				session.setAttribute("studentId", student.getStudentId());
 				session.setAttribute("studentName", student.getName());
 
-				// main.jsp로 리다이렉트
-				response.sendRedirect(request.getContextPath() + "/main.jsp");
-			} else {
-				// 로그인 실패: 에러 메시지와 함께 login.jsp로 포워드
-				request.setAttribute("errorMessage", "학번 또는 비밀번호가 올바르지 않습니다.");
-				request.setAttribute("studentId", studentIdStr);
-				request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
-			}
+                Log log = new Log();
+                log.setActionType("LOGIN");
+                log.setDetails("Student " + studentId + " login");
+                log.setStudentId(studentId);
+                log.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+                logDAO.insertLog(log);
+
+                // main.jsp로 리다이렉트
+                response.sendRedirect(request.getContextPath() + "/main.jsp");
+            } else {
+                // 로그인 실패: 에러 메시지와 함께 login.jsp로 포워드
+                request.setAttribute("errorMessage", "학번 또는 비밀번호가 올바르지 않습니다.");
+                request.setAttribute("studentId", studentIdStr);
+                request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
+            }
 
 		} catch (NumberFormatException e) {
 			// 학번이 숫자가 아닌 경우
