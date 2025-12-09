@@ -22,7 +22,7 @@
 
 ## 4. Dependencies 설정하기
 1. `File → Project Structure... → Modules`
-2. 현재 프로젝트(`ProjectDBPhase4`) 선택 
+2. 현재 프로젝트(`ProjectDBPhase4`) 선택
 3. `Dependencies` 버튼 항목 선택
 4. 기존 Eclipse 전용 라이브러리 제거 (빨간색으로 표시됨)
    <br>각각 선택 후, `-` 버튼 클릭
@@ -49,11 +49,17 @@
 2. `Web Application: Exploded > → From Modules...`
 3. 현재 프로젝트(`ProjectDBPhase4`) 선택 → `OK`
 
-## 7. 프로젝트 빌드 (이후 실행때는 필요 없음)
+## 7. 리소스 폴더 설정
+1. `File → Project Structure... → Modules`
+2. 현재 프로젝트(`ProjectDBPhase4`) 선택
+3. `Sources` 버튼 항목 선택
+4. `src/main/resources`를 `Resources`로 설정
+
+## 8. 프로젝트 빌드 (이후 실행때는 필요 없음)
 1. `Build → Build Project`
 2. `Build → Build Artifacts... → ProjectDBPhase4:war exploded > → Build`
 
-## 8. (편의성) Run Configuration 추가
+## 9. (편의성) Run Configuration 추가
 1. 실행 버튼 옆 `Edit Configurations...`
 2. `'+'(Add New Configuration) → Tomcat Server → Local` 혹은 기존거 수정
 3. 해당 configuration(예: `Tomcat 10.1.48`) 선택

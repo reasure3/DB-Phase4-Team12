@@ -2,6 +2,9 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=eclipse,java,intellij
 # 추가로 필요한 것들만 정리함
 
+src/main/resources/db.properties
+lib/ojdbc*.jar
+
 ############################################
 # IDE 관련
 ############################################
@@ -18,7 +21,7 @@ local.properties
 *~.nib
 
 # IntelliJ IDEA
-.idea/
+.idea/*
 *.iml
 *.iws
 out/
@@ -26,6 +29,9 @@ out/
 # IntelliJ 개별 설정
 !.idea/codeStyles/
 !.idea/inspectionProfiles/
+!.idea/encodings.xml
+!.idea/misc.xml
+!.idea/runConfigurations/
 
 ############################################
 # 빌드 시스템 & 산출물
