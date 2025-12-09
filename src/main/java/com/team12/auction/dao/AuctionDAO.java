@@ -67,14 +67,17 @@ public class AuctionDAO {
 	/**
 	 * 나의 경매 조회 (참여 가능한 모든 경매 + 내 입찰 정보) 입찰했으면 입찰 금액 표시, 안 했으면 0 표시
 	 */
-	public Map<AuctionDetail, Bid> selectMyAuctions(int studentId) throws SQLException {
-		String sql = "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, "
-				+ "       a.created_at, a.section_id, " + "       s.section_number, s.professor, "
-				+ "       c.course_id, c.course_name, c.department, c.credits, "
-				+ "       b.bid_amount, b.is_successful " + "FROM AUCTION a "
-				+ "JOIN SECTION s ON a.section_id = s.section_id " + "JOIN COURSE c ON s.course_id = c.course_id "
-				+ "LEFT JOIN BID b ON b.auction_id = a.auction_id AND b.student_id = ? " + // LEFT JOIN
-				"WHERE a.status = 'COMPLETED' " + "ORDER BY a.start_time DESC";
+        public Map<AuctionDetail, Bid> selectMyAuctions(int studentId) throws SQLException {
+                String sql = "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, "
+                                + "       a.created_at, a.section_id, " + "       s.section_number, s.professor, "
+                                + "       c.course_id, c.course_name, c.department, c.credits, "
+                                + "       b.bid_amount, b.is_successful " + "FROM AUCTION a "
+                                + "JOIN SECTION s ON a.section_id = s.section_id " + "JOIN COURSE c ON s.course_id = c.course_id "
+                                + "JOIN BasketItem bi ON bi.section_id = a.section_id "
+                                + "JOIN Basket ba ON ba.basket_id = bi.basket_id "
+                                + "LEFT JOIN BID b ON b.auction_id = a.auction_id AND b.student_id = ? "
+                                + "WHERE ba.student_id = ? " + "  AND a.status IN ('ACTIVE', 'COMPLETED') "
+                                + "ORDER BY a.start_time DESC";
 
 		Map<AuctionDetail, Bid> auctionBidMap = new HashMap<>();
 
@@ -84,8 +87,9 @@ public class AuctionDAO {
 
 		try {
 			conn = DBConnection.getConnection();
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, studentId);
+                        pstmt = conn.prepareStatement(sql);
+                        pstmt.setInt(1, studentId);
+                        pstmt.setInt(2, studentId);
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
@@ -142,8 +146,9 @@ public class AuctionDAO {
 
 		try {
 			conn = DBConnection.getConnection();
-			pstmt = conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
+                        pstmt = conn.prepareStatement(sql);
+                        pstmt.setString(1, auctionId);
+                        rs = pstmt.executeQuery();
 
 			if (rs.next()) {
 				AuctionDetail auction = new AuctionDetail();

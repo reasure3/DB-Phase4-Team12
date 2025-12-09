@@ -39,10 +39,10 @@
 					class="menu-card">
 					<h3>수강꾸러미</h3>
 					<p>나의 수강꾸러미를 관리하세요</p>
-				</a> <a href="<%=request.getContextPath()%>/auction/auctionList.jsp"
-					class="menu-card">
-					<h3>경매</h3>
-					<p>경매를 관리하세요</p>
+                                </a> <a href="<%=request.getContextPath()%>/auction/list"
+                                        class="menu-card">
+                                        <h3>경매</h3>
+                                        <p>경매를 관리하세요</p>
 				</a> <a href="<%=request.getContextPath()%>/enrollment/myEnrollment.jsp"
 					class="menu-card">
 					<h3>등록 조회</h3>
@@ -50,6 +50,6 @@
 				</a>
 			</div>
 		</div>
-	</div>
+        </div>
 </body>
 </html>
