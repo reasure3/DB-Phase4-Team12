@@ -192,7 +192,7 @@ public class StudentDAO {
             "FROM Student s " +
             "LEFT JOIN Enrollment e ON s.student_id = e.student_id " +
             "WHERE s.student_id = ? " +
-            "GROUP BY s.max_point";
+            "GROUP BY s.student_id, s.max_point";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
