@@ -1,7 +1,33 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*" %>
+<%@ page import="java.sql.SQLException" %>
+<%@ page import="com.team12.auction.dao.SectionDAO" %>
+<%@ page import="com.team12.auction.model.dto.SectionSearchResult" %>
 <%@ include file="/auth/loginCheck.jsp" %>
 <%
+    request.setCharacterEncoding("UTF-8");
     String studentName = (String) session.getAttribute("studentName");
+    String keyword = request.getParameter("keyword");
+    String department = request.getParameter("department");
+
+    String successMessage = (String) session.getAttribute("successMessage");
+    String errorMessage = (String) session.getAttribute("errorMessage");
+    if (successMessage != null) session.removeAttribute("successMessage");
+    if (errorMessage != null) session.removeAttribute("errorMessage");
+
+    List<SectionSearchResult> sections = new ArrayList<>();
+    try {
+        SectionDAO sectionDAO = new SectionDAO();
+        sections = sectionDAO.searchSections(keyword, department);
+    } catch (SQLException e) {
+        e.printStackTrace();
+        errorMessage = "강의 목록을 불러오는 중 오류가 발생했습니다.";
+    }
+
+    String currentUrl = request.getRequestURI();
+    if (request.getQueryString() != null) {
+        currentUrl += "?" + request.getQueryString();
+    }
 %>
 <!DOCTYPE html>
 <html>
@@ -23,31 +49,32 @@
     </div>
 
     <div class="content">
-        <div class="page-actions">
+        <% if (successMessage != null) { %>
+            <div class="success-message"><%= successMessage %></div>
+        <% } %>
+        <% if (errorMessage != null) { %>
+            <div class="error-message"><%= errorMessage %></div>
+        <% } %>
+
+        <form class="page-actions" method="get" action="<%=request.getRequestURI()%>">
             <div class="filters">
-                <input type="text" placeholder="강의명, 교수명 검색">
-                <select>
-                    <option value="">학과 전체</option>
-                    <option>컴퓨터공학과</option>
-                    <option>경영학과</option>
-                    <option>경제학과</option>
+                <input type="text" name="keyword" placeholder="강의명, 교수명 검색" value="<%= keyword != null ? keyword : "" %>">
+                <select name="department">
+                    <option value="" <%= (department == null || department.isEmpty()) ? "selected" : "" %>>학과 전체</option>
+                    <option value="컴퓨터공학과" <%= "컴퓨터공학과".equals(department) ? "selected" : "" %>>컴퓨터공학과</option>
+                    <option value="경영학과" <%= "경영학과".equals(department) ? "selected" : "" %>>경영학과</option>
+                    <option value="경제학과" <%= "경제학과".equals(department) ? "selected" : "" %>>경제학과</option>
                 </select>
-                <select>
-                    <option value="">학년 전체</option>
-                    <option>1학년</option>
-                    <option>2학년</option>
-                    <option>3학년</option>
-                    <option>4학년</option>
-                </select>
-                <button class="btn-primary" type="button">검색</button>
+                <button class="btn-primary" type="submit">검색</button>
             </div>
             <a href="<%=request.getContextPath()%>/basket/myBasket.jsp" class="btn-secondary">수강꾸러미 보기</a>
-        </div>
+        </form>
 
         <table class="data-table">
             <thead>
             <tr>
                 <th>강의코드</th>
+                <th>분반</th>
                 <th>강의명</th>
                 <th>교수</th>
                 <th>학과</th>
@@ -58,36 +85,37 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>CS101</td>
-                <td>자료구조</td>
-                <td>김교수</td>
-                <td>컴퓨터공학과</td>
-                <td>3학점</td>
-                <td>50명</td>
-                <td><span class="badge success">12</span></td>
-                <td><button class="btn-primary" type="button">담기</button></td>
-            </tr>
-            <tr>
-                <td>BUS210</td>
-                <td>마케팅 원론</td>
-                <td>이교수</td>
-                <td>경영학과</td>
-                <td>3학점</td>
-                <td>60명</td>
-                <td><span class="badge warning">5</span></td>
-                <td><button class="btn-primary" type="button">담기</button></td>
-            </tr>
-            <tr>
-                <td>ECON310</td>
-                <td>계량경제학</td>
-                <td>박교수</td>
-                <td>경제학과</td>
-                <td>3학점</td>
-                <td>40명</td>
-                <td><span class="badge danger">0</span></td>
-                <td><button class="btn-disabled" type="button" disabled>마감</button></td>
-            </tr>
+            <% if (sections.isEmpty()) { %>
+                <tr>
+                    <td colspan="9" style="text-align: center;">조건에 맞는 강의가 없습니다.</td>
+                </tr>
+            <% } else { %>
+                <% for (SectionSearchResult item : sections) { %>
+                    <tr>
+                        <td><%= item.getCourseId() %></td>
+                        <td><%= item.getSectionNumber() %>분반</td>
+                        <td><%= item.getCourseName() %></td>
+                        <td><%= item.getProfessor() %></td>
+                        <td><%= item.getDepartment() %></td>
+                        <td><%= item.getCredits() %>학점</td>
+                        <td><%= item.getCapacity() %>명</td>
+                        <td>
+                            <% int remaining = item.getRemainingSeats(); %>
+                            <% String badgeClass = remaining > 5 ? "success" : (remaining > 0 ? "warning" : "danger"); %>
+                            <span class="badge <%= badgeClass %>"><%= remaining %></span>
+                        </td>
+                        <td>
+                            <form method="post" action="<%=request.getContextPath()%>/basket/add" class="inline-form">
+                                <input type="hidden" name="sectionId" value="<%= item.getSectionId() %>">
+                                <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
+                                <button class="<%= item.getRemainingSeats() > 0 ? "btn-primary" : "btn-disabled" %>" type="submit" <%= item.getRemainingSeats() == 0 ? "disabled" : "" %>>
+                                    <%= item.getRemainingSeats() == 0 ? "마감" : "담기" %>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                <% } %>
+            <% } %>
             </tbody>
         </table>
     </div>

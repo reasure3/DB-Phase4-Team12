@@ -1,7 +1,35 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*" %>
+<%@ page import="java.sql.SQLException" %>
+<%@ page import="com.team12.auction.dao.BasketDAO" %>
+<%@ page import="com.team12.auction.model.dto.BasketItemDetail" %>
 <%@ include file="/auth/loginCheck.jsp" %>
 <%
+    request.setCharacterEncoding("UTF-8");
     String studentName = (String) session.getAttribute("studentName");
+    int studentId = (Integer) session.getAttribute("studentId");
+
+    String successMessage = (String) session.getAttribute("successMessage");
+    String errorMessage = (String) session.getAttribute("errorMessage");
+    if (successMessage != null) session.removeAttribute("successMessage");
+    if (errorMessage != null) session.removeAttribute("errorMessage");
+
+    BasketDAO basketDAO = new BasketDAO();
+    List<BasketItemDetail> basketItems = new ArrayList<>();
+    try {
+        basketDAO.ensureBasketExists(studentId);
+        basketItems = basketDAO.getMyBasket(studentId);
+    } catch (SQLException e) {
+        e.printStackTrace();
+        errorMessage = "수강꾸러미 정보를 불러오는 중 오류가 발생했습니다.";
+    }
+
+    int totalCredits = 0;
+    for (BasketItemDetail item : basketItems) {
+        totalCredits += item.getCredits();
+    }
+
+    String currentUrl = request.getRequestURI();
 %>
 <!DOCTYPE html>
 <html>
@@ -23,9 +51,16 @@
     </div>
 
     <div class="content">
+        <% if (successMessage != null) { %>
+            <div class="success-message"><%= successMessage %></div>
+        <% } %>
+        <% if (errorMessage != null) { %>
+            <div class="error-message"><%= errorMessage %></div>
+        <% } %>
+
         <div class="page-actions">
             <div>
-                <p class="summary-text">현재 담긴 강의: <strong>3과목</strong> / 총 학점: <strong>9학점</strong></p>
+                <p class="summary-text">현재 담긴 강의: <strong><%= basketItems.size() %>과목</strong> / 총 학점: <strong><%= totalCredits %>학점</strong></p>
             </div>
             <div class="action-buttons">
                 <a href="<%=request.getContextPath()%>/auction/auctionList.jsp" class="btn-primary">경매로 이동</a>
@@ -37,51 +72,47 @@
             <thead>
             <tr>
                 <th>강의코드</th>
+                <th>분반</th>
                 <th>강의명</th>
                 <th>교수</th>
                 <th>학점</th>
-                <th>시간/장소</th>
+                <th>강의실</th>
                 <th>상태</th>
                 <th>관리</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>CS101</td>
-                <td>자료구조</td>
-                <td>김교수</td>
-                <td>3학점</td>
-                <td>월/수 09:00 - 10:30 · 공학관 201</td>
-                <td><span class="badge success">경매 진행중</span></td>
-                <td>
-                    <button class="btn-secondary" type="button">취소</button>
-                    <button class="btn-primary" type="button">경매 참여</button>
-                </td>
-            </tr>
-            <tr>
-                <td>BUS210</td>
-                <td>마케팅 원론</td>
-                <td>이교수</td>
-                <td>3학점</td>
-                <td>화/목 10:00 - 11:30 · 경영관 402</td>
-                <td><span class="badge warning">경매 대기</span></td>
-                <td>
-                    <button class="btn-secondary" type="button">취소</button>
-                    <button class="btn-primary" type="button">경매 참여</button>
-                </td>
-            </tr>
-            <tr>
-                <td>ECON310</td>
-                <td>계량경제학</td>
-                <td>박교수</td>
-                <td>3학점</td>
-                <td>금 13:00 - 16:00 · 사회관 105</td>
-                <td><span class="badge danger">마감</span></td>
-                <td>
-                    <button class="btn-secondary" type="button">취소</button>
-                    <button class="btn-disabled" type="button" disabled>경매 종료</button>
-                </td>
-            </tr>
+            <% if (basketItems.isEmpty()) { %>
+                <tr>
+                    <td colspan="8" style="text-align:center;">수강꾸러미에 담긴 분반이 없습니다.</td>
+                </tr>
+            <% } else { %>
+                <% for (BasketItemDetail item : basketItems) { %>
+                    <tr>
+                        <td><%= item.getCourseId() %></td>
+                        <td><%= item.getSectionNumber() %>분반</td>
+                        <td><%= item.getCourseName() %></td>
+                        <td><%= item.getProfessor() %></td>
+                        <td><%= item.getCredits() %>학점</td>
+                        <td><%= item.getClassroom() %></td>
+                        <td>
+                            <% String status = item.getStatus() != null ? item.getStatus() : "PENDING"; %>
+                            <% String badgeClass = "PENDING".equalsIgnoreCase(status) ? "warning" : ("SUCCESS".equalsIgnoreCase(status) ? "success" : "danger"); %>
+                            <span class="badge <%= badgeClass %>"><%= status %></span>
+                            <% if (item.getReason() != null && !item.getReason().isEmpty()) { %>
+                                <div class="helper-text"><%= item.getReason() %></div>
+                            <% } %>
+                        </td>
+                        <td>
+                            <form method="post" action="<%=request.getContextPath()%>/basket/remove" class="inline-form">
+                                <input type="hidden" name="sectionId" value="<%= item.getSectionId() %>">
+                                <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
+                                <button class="btn-secondary" type="submit">취소</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% } %>
+            <% } %>
             </tbody>
         </table>
     </div>
