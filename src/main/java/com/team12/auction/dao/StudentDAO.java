@@ -276,3 +276,11 @@ public class StudentDAO {
         }
     }
 }
+
+	/**
+	 * 학번으로 학생 조회 (selectById의 별칭)
+	 */
+	public Student selectByStudentId(int studentId) throws SQLException {
+		return selectById(studentId);
+	}
+}

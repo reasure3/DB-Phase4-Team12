@@ -48,12 +48,13 @@ public class LogoutServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        // 로그인 페이지로 리다이렉트
-        response.sendRedirect(request.getContextPath() + "/auth/login");
-    }
+		// 로그인 페이지로 리다이렉트
+		response.sendRedirect(request.getContextPath() + "/auth/login");
+	}
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doGet(request, response);
-    }
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request, response);
+	}
 }
