@@ -61,10 +61,10 @@
 					</p>
 				</div>
 				<div class="action-buttons">
-					<a href="<%=request.getContextPath()%>/section/list"
-						class="btn-secondary">강의 조회</a> <a
-						href="<%=request.getContextPath()%>/auction/auctionList.jsp"
-						class="btn-secondary">경매 조회</a>
+                                        <a href="<%=request.getContextPath()%>/section/list"
+                                                class="btn-secondary">강의 조회</a> <a
+                                                href="<%=request.getContextPath()%>/auction/list"
+                                                class="btn-secondary">경매 조회</a>
 				</div>
 			</div>
 

@@ -59,7 +59,7 @@ public class BidDAO {
 	 * 
 	 * @return 낙찰 여부 (true: 낙찰, false: 탈락)
 	 */
-	public boolean insertAndCheckWinner(Bid bid, int availableSlots, String sectionId) throws SQLException {
+        public boolean insertAndCheckWinner(Bid bid, int availableSlots, String sectionId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -134,8 +134,71 @@ public class BidDAO {
 			DBConnection.close(rs, pstmt, conn);
 		}
 
-		return isWinner;
-	}
+                return isWinner;
+        }
+
+        /**
+         * 새 입찰을 추가하기 전에 예상 순위를 계산한다 (동점일 경우 기존 입찰이 우선이므로 동점 건수를 모두 앞에 둔다).
+         */
+        public int calculateProspectiveRank(String auctionId, int bidAmount) throws SQLException {
+                String sql = "SELECT COUNT(*) + 1 AS my_rank " + "FROM Bid " + "WHERE auction_id = ? "
+                                + "AND (bid_amount > ? OR bid_amount = ?)";
+
+                Connection conn = null;
+                PreparedStatement pstmt = null;
+                ResultSet rs = null;
+                int rank = Integer.MAX_VALUE;
+
+                try {
+                        conn = DBConnection.getConnection();
+                        pstmt = conn.prepareStatement(sql);
+                        pstmt.setString(1, auctionId);
+                        pstmt.setInt(2, bidAmount);
+                        pstmt.setInt(3, bidAmount);
+
+                        rs = pstmt.executeQuery();
+
+                        if (rs.next()) {
+                                rank = rs.getInt(1);
+                        }
+
+                } catch (SQLException e) {
+                        throw e;
+                } finally {
+                        DBConnection.close(rs, pstmt, conn);
+                }
+
+                return rank;
+        }
+
+        /**
+         * 낙찰 여부와 관계없이 단순히 입찰을 기록한다.
+         */
+        public void insertBid(Bid bid) throws SQLException {
+                Connection conn = null;
+                PreparedStatement pstmt = null;
+
+                try {
+                        conn = DBConnection.getConnection();
+
+                        String insertBidSql = "INSERT INTO Bid (bid_sequence, bid_amount, bid_time, is_successful, auction_id, student_id) "
+                                        + "VALUES (?, ?, SYSDATE, NULL, ?, ?)";
+
+                        pstmt = conn.prepareStatement(insertBidSql);
+                        pstmt.setString(1, bid.getBidSequence());
+                        pstmt.setInt(2, bid.getBidAmount());
+                        pstmt.setString(3, bid.getAuctionId());
+                        pstmt.setInt(4, bid.getStudentId());
+                        pstmt.executeUpdate();
+
+                        DBConnection.commit(conn);
+                } catch (SQLException e) {
+                        DBConnection.rollback(conn);
+                        throw e;
+                } finally {
+                        DBConnection.close(pstmt, conn);
+                }
+        }
 
 	/**
 	 * 학생이 특정 경매에 이미 입찰했는지 확인
