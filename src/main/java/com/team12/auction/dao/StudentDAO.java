@@ -214,4 +214,33 @@ public class StudentDAO {
         }
         return points;
     }
+
+    public boolean updateStudent(Student student) throws SQLException {
+        String sql = "UPDATE Student SET name = ?, department = ?, grade = ?, " +
+            "max_credits = ?, max_point = ? " +
+            "WHERE student_id = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = DBConnection.getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, student.getName());
+            pstmt.setString(2, student.getDepartment());
+            pstmt.setInt(3, student.getGrade());
+            pstmt.setInt(4, student.getMaxCredits());
+            pstmt.setInt(5, student.getMaxPoint());
+            pstmt.setInt(6, student.getStudentId());
+
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            DBConnection.close(pstmt, conn);
+        }
+    }
 }

@@ -36,7 +36,7 @@ public class LogDAO {
                 Log log = new Log();
                 log.setLogId(rs.getString(1));
                 log.setActionType(rs.getString(2));
-                log.setTimestamp(rs.getDate(3));
+                log.setTimestamp(rs.getTimestamp(3));
                 log.setDetails(rs.getString(4));
                 log.setStudentId(studentId);
 
@@ -81,7 +81,7 @@ public class LogDAO {
                 Log log = new Log();
                 log.setLogId(rs.getString(1));
                 log.setActionType(rs.getString(2));
-                log.setTimestamp(rs.getDate(3));
+                log.setTimestamp(rs.getTimestamp(3));
                 log.setDetails(rs.getString(4));
                 log.setStudentId(studentId);
 
@@ -126,7 +126,7 @@ public class LogDAO {
                 Log log = new Log();
                 log.setLogId(rs.getString(1));
                 log.setActionType(rs.getString(2));
-                log.setTimestamp(rs.getDate(3));
+                log.setTimestamp(rs.getTimestamp(3));
                 log.setDetails(rs.getString(4));
                 log.setStudentId(studentId);
 
@@ -149,8 +149,6 @@ public class LogDAO {
      * log_id는 새로 만들어집니다.
      */
     public boolean insertLog(Log log) throws SQLException {
-        String logId = generateLogSequence();
-
         String sql = "INSERT INTO Log (log_id, action_type, timestamp, details, " +
             "student_id, auction_id) " +
             "VALUES (?, ?, ?, ?, ?, ?)";
@@ -160,11 +158,12 @@ public class LogDAO {
 
         try {
             conn = DBConnection.getConnection();
+            String logId = generateLogSequence(conn);
             pstmt = conn.prepareStatement(sql);
 
             pstmt.setString(1, logId);
             pstmt.setString(2, log.getActionType());
-            pstmt.setDate(3, log.getTimestamp());
+            pstmt.setTimestamp(3, log.getTimestamp());
             pstmt.setString(4, log.getDetails());
             pstmt.setInt(5, log.getStudentId());
 
@@ -216,16 +215,21 @@ public class LogDAO {
      *
      * @return Generated log ID (e.g., "L0001")
      */
-    public String generateLogSequence() throws SQLException {
+    public String generateLogSequence(Connection conn) throws SQLException {
         String sql = "SELECT 'L' || LPAD(NVL(MAX(TO_NUMBER(SUBSTR(log_id, 2))), 0) + 1, 4, '0') FROM Log";
 
-        Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         String sequence = "L0001";
 
         try {
-            conn = DBConnection.getConnection();
+            // FOR UPDATE로 락 걸기 (더미 테이블 사용)
+            String lockSql = "SELECT 1 FROM Log WHERE ROWNUM = 1 FOR UPDATE";
+            pstmt = conn.prepareStatement(lockSql);
+            pstmt.executeQuery();
+            pstmt.close();
+
+            // 시퀀스 생성
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
@@ -233,10 +237,12 @@ public class LogDAO {
                 sequence = rs.getString(1);
             }
 
+            pstmt.close();
+            rs.close();
+
         } catch (SQLException e) {
+            DBConnection.rollback(conn);
             throw e;
-        } finally {
-            DBConnection.close(rs, pstmt, conn);
         }
 
         return sequence;

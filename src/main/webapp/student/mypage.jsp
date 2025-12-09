@@ -27,8 +27,27 @@
 <body>
 <div class="header">
     <h1>내 정보</h1>
-    <a href="main.jsp" class="btn-secondary">메인으로</a>
+    <a href="<%=request.getContextPath()%>/main.jsp" class="btn-secondary">메인으로</a>
 </div>
+
+<%
+    String successMessage = (String) session.getAttribute("successMessage");
+    if (successMessage != null) {
+        session.removeAttribute("successMessage");
+%>
+<div class="success-message">
+    <%= successMessage %>
+</div>
+<% } %>
+
+<%
+    String errorMessage = (String) request.getAttribute("errorMessage");
+    if (errorMessage != null) {
+%>
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+<% } %>
 
 <div class="container">
     <!-- Basic Information -->
@@ -54,6 +73,11 @@
                 <div class="info-label">학년</div>
                 <div class="info-value"><%= student.getGrade() %>학년</div>
             </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="<%=request.getContextPath()%>/editProfile" class="btn btn-primary">내 정보 수정</a>
+            <a href="<%=request.getContextPath()%>/auth/changePassword" class="btn btn-warning">비밀번호 변경</a>
         </div>
     </div>
 

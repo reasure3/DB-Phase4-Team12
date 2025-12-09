@@ -33,7 +33,7 @@ public class MyPageServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("studentId") == null) {
-            response.sendRedirect("auth/login.jsp");
+            response.sendRedirect("/auth/login");
             return;
         }
 
@@ -43,7 +43,7 @@ public class MyPageServlet extends HttpServlet {
             // Get student information
             Student student = studentDAO.selectById(studentId);
             if (student == null) {
-                response.sendRedirect("auth/login.jsp");
+                response.sendRedirect("/auth/login");
                 return;
             }
 
@@ -66,7 +66,7 @@ public class MyPageServlet extends HttpServlet {
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "정보를 불러오는 중 오류가 발생했습니다.");
-            request.getRequestDispatcher("/student/mypage.jsp").forward(request, response);
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 }

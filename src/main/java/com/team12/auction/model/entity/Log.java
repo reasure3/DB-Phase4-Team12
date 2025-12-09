@@ -1,18 +1,18 @@
 package com.team12.auction.model.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class Log {
     private String logId;
     private String actionType;
-    private Date timestamp;
+    private Timestamp timestamp;
     private String details;
     private int studentId;
     private String auctionId;
 
     public Log() {}
 
-    public Log(String logId, String actionType, Date timestamp,
+    public Log(String logId, String actionType, Timestamp timestamp,
                String details, int studentId, String auctionId) {
         this.logId = logId;
         this.actionType = actionType;
@@ -24,14 +24,14 @@ public class Log {
 
     public String getLogId() { return logId; }
     public String getActionType() { return actionType; }
-    public Date getTimestamp() { return timestamp; }
+    public Timestamp getTimestamp() { return timestamp; }
     public String getDetails() { return details; }
     public int getStudentId() { return studentId; }
     public String getAuctionId() { return auctionId; }
 
     public void setLogId(String logId) { this.logId = logId; }
     public void setActionType(String actionType) { this.actionType = actionType; }
-    public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
+    public void setTimestamp(Timestamp timestamp) { this.timestamp = timestamp; }
     public void setDetails(String details) { this.details = details; }
     public void setStudentId(int studentId) { this.studentId = studentId; }
     public void setAuctionId(String auctionId) { this.auctionId = auctionId; }

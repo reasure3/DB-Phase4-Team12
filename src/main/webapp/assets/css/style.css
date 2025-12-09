@@ -65,6 +65,20 @@ body {
 }
 
 /* ========== 폼 ========== */
+.form-card {
+    background: white;
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-card h2 {
+    color: #5cb85c;
+    margin-bottom: 30px;
+    font-size: 24px;
+    text-align: center;
+}
+
 .form-group {
     margin-bottom: 20px;
 }
@@ -91,6 +105,13 @@ body {
 }
 
 /* ========== 버튼 ========== */
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
 
 /* 다른 코드랑 충돌나지 않게 않게 유지 */
 .btn-login {
@@ -125,14 +146,13 @@ body {
 
 /* Primary 버튼 (녹색 배경) */
 .btn-primary {
-    width: 100%;
-    padding: 12px;
     background-color: #4CAF50;
     color: white;
-    border: none;
+    padding: 8px 16px;
+    border: 1px solid white;
     border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 .btn-primary:hover {
@@ -152,6 +172,26 @@ body {
 
 .btn-secondary:hover {
     background-color: #f0f0f0;
+}
+
+.btn-warning {
+    background-color: #f0ad4e;
+    color: white;
+    padding: 8px 16px;
+    border: 1px solid white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-warning:hover {
+    background-color: #ec971f;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
 }
 
 /* ========== 메시지 ========== */
@@ -337,4 +377,71 @@ body {
     text-align: center;
     padding: 40px;
     color: #999;
+}
+
+/* 에러 페이지 */
+.help-text {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fff3cd;
+    border-radius: 5px;
+    border: 1px solid #ffeaa7;
+}
+
+.help-text h3 {
+    color: #856404;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.help-text ul {
+    margin-left: 20px;
+    color: #856404;
+}
+
+.help-text li {
+    margin-bottom: 8px;
+}
+
+.error-card {
+    background: white;
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 64px;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.error-title {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.error-message {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.error-details {
+    background-color: #f8f9fa;
+    border-left: 4px solid #dc3545;
+    padding: 15px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.error-details code {
+    display: block;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #721c24;
+    word-wrap: break-word;
 }
