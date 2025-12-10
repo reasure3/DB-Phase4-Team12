@@ -5,24 +5,6 @@
         version="2.4" id="WebApp_ID">
         <display-name>ProjectDBPhase4</display-name>
 
-        <servlet>
-                <servlet-name>MyEnrollmentServlet</servlet-name>
-                <servlet-class>com.team12.auction.servlet.MyEnrollmentServlet</servlet-class>
-        </servlet>
-        <servlet-mapping>
-                <servlet-name>MyEnrollmentServlet</servlet-name>
-                <url-pattern>/enrollment/my</url-pattern>
-        </servlet-mapping>
-
-        <servlet>
-                <servlet-name>EnrollmentCancelServlet</servlet-name>
-                <servlet-class>com.team12.auction.servlet.EnrollmentCancelServlet</servlet-class>
-        </servlet>
-        <servlet-mapping>
-                <servlet-name>EnrollmentCancelServlet</servlet-name>
-                <url-pattern>/enrollment/cancel</url-pattern>
-        </servlet-mapping>
-
         <welcome-file-list>
                 <welcome-file>index.html</welcome-file>
                 <welcome-file>index.htm</welcome-file>
