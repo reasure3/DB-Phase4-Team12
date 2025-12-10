@@ -38,6 +38,19 @@ public class EnrollmentListServlet extends HttpServlet {
 
                 int studentId = (Integer) session.getAttribute("studentId");
 
+                // 세션 메시지를 JSP로 전달하고 1회성으로 제거
+                String successMessage = (String) session.getAttribute("successMessage");
+                String errorMessage = (String) session.getAttribute("errorMessage");
+
+                if (successMessage != null) {
+                        request.setAttribute("successMessage", successMessage);
+                        session.removeAttribute("successMessage");
+                }
+                if (errorMessage != null) {
+                        request.setAttribute("errorMessage", errorMessage);
+                        session.removeAttribute("errorMessage");
+                }
+
                 try {
                         List<EnrollmentDetail> enrollments = enrollmentDAO.getMyEnrollment(studentId);
                         request.setAttribute("enrollments", enrollments);

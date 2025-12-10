@@ -14,6 +14,7 @@
         enrollments = new ArrayList<>();
     }
 
+    String successMessage = (String) request.getAttribute("successMessage");
     String errorMessage = (String) request.getAttribute("errorMessage");
 %>
 <!DOCTYPE html>
@@ -37,6 +38,9 @@
                 </div>
 
                 <div class="content">
+                        <% if (successMessage != null) { %>
+                        <div class="success-message"><%= successMessage %></div>
+                        <% } %>
                         <% if (errorMessage != null) { %>
                         <div class="error-message"><%= errorMessage %></div>
                         <% } %>
@@ -65,12 +69,13 @@
                                                 <th>정원</th>
                                                 <th>신청 경로</th>
                                                 <th>사용 포인트</th>
+                                                <th>관리</th>
                                         </tr>
                                 </thead>
                                 <tbody>
                                         <% if (enrollments.isEmpty()) { %>
                                         <tr>
-                                                <td colspan="9" style="text-align: center;">등록된 강의가 없습니다.</td>
+                                                <td colspan="10" style="text-align: center;">등록된 강의가 없습니다.</td>
                                         </tr>
                                         <% } else { %>
                                         <% for (EnrollmentDetail enrollment : enrollments) { %>
@@ -84,6 +89,17 @@
                                                 <td><%= enrollment.getCapacity() %>명</td>
                                                 <td><%= enrollment.getEnrollmentSource() %></td>
                                                 <td><%= enrollment.getPointsUsed() %>점</td>
+                                                <td>
+                                                        <form method="post"
+                                                                action="<%=request.getContextPath()%>/enrollment/cancel"
+                                                                class="inline-form">
+                                                                <input type="hidden" name="sectionId"
+                                                                        value="<%= enrollment.getSectionId() %>">
+                                                                <input type="hidden" name="returnUrl"
+                                                                        value="<%= request.getContextPath() %>/enrollment/list">
+                                                                <button class="btn-secondary" type="submit">취소</button>
+                                                        </form>
+                                                </td>
                                         </tr>
                                         <% } %>
                                         <% } %>
