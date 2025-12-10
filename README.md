@@ -283,6 +283,13 @@ http://localhost:8080/ProjectDBPhase4/
     1. 프로젝트 우클릭 → Properties → Resource → Text file encoding
     2. **UTF-8** 선택 → Apply
 
+### 7. Tomcat 시작 시 서블릿 매핑 충돌 (IllegalArgumentException)
+- **증상:** 서버 시작 로그에 `두 서블릿들 모두 url-pattern [/enrollment/cancel]에 매핑되어 있는데, 이는 허용되지 않습니다.` 와 함께 시작 실패
+- **원인:** 동일한 서블릿 URL을 `@WebServlet` 애노테이션과 `web.xml` 양쪽에 중복 등록했을 때 발생
+- **해결:** 한 가지 방법만 사용하도록 정리
+    - `web.xml`을 사용할 경우 해당 서블릿 클래스의 `@WebServlet` 애노테이션 제거
+    - 또는 애노테이션만 남기고 `web.xml`에서 중복 매핑 제거
+
 ---
 
-**마지막 수정:** 2025-12-08
+**마지막 수정:** 2025-12-10
