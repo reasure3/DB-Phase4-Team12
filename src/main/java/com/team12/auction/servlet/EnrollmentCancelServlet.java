@@ -26,7 +26,7 @@ public class EnrollmentCancelServlet extends HttpServlet {
                 String sectionId = request.getParameter("sectionId");
                 String returnUrl = request.getParameter("returnUrl");
                 if (returnUrl == null || returnUrl.isBlank()) {
-                        returnUrl = request.getContextPath() + "/enrollment/my";
+                        returnUrl = request.getContextPath() + "/enrollment/list";
                 }
 
                 if (sectionId == null || sectionId.isBlank()) {

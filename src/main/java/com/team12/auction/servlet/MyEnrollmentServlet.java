@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@WebServlet("/enrollment/my")
+@WebServlet(urlPatterns = { "/enrollment/my", "/enrollment/list" })
 public class MyEnrollmentServlet extends HttpServlet {
         private EnrollmentDAO enrollmentDAO;
 
@@ -48,6 +48,7 @@ public class MyEnrollmentServlet extends HttpServlet {
                 }
 
                 request.setAttribute("myEnrollments", myEnrollments);
+                request.setAttribute("returnUrl", request.getContextPath() + request.getServletPath());
 
                 request.getRequestDispatcher("/enrollment/myEnrollment.jsp").forward(request, response);
         }

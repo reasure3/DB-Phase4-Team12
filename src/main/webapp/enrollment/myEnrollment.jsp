@@ -85,12 +85,12 @@
                                     <td>
                                         <form method="post" action="<c:url value='/enrollment/cancel' />" class="inline-form">
                                             <input type="hidden" name="sectionId" value="${item.sectionId}">
-                                            <input type="hidden" name="returnUrl" value="<c:url value='/enrollment/my' />">
+                                            <input type="hidden" name="returnUrl" value="${returnUrl}">
                                             <button class="btn-secondary" type="submit">취소</button>
                                         </form>
-                                    </td>
-                                </tr>
-                            </c:forEach>
+                                </td>
+                        </tr>
+                        </c:forEach>
                         </c:otherwise>
                     </c:choose>
                 </tbody>
