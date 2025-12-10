@@ -3,7 +3,6 @@ package com.team12.auction.servlet;
 import com.team12.auction.dao.EnrollmentDAO;
 import com.team12.auction.model.dto.EnrollmentDetail;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +13,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/enrollment/my")
 public class MyEnrollmentServlet extends HttpServlet {
         private EnrollmentDAO enrollmentDAO;
 
