@@ -14,11 +14,11 @@ public class EnrollmentDAO {
 	/**
 	 * 나의 등록 조회: 내가 수강 신청한 분반의 모든 속성과 강의 이름 반환
 	 */
-	public List<EnrollmentDetail> getMyEnrollment(int studentId) throws SQLException {
-		String sql = "SELECT s.section_id, s.section_number, s.professor, " + "s.capacity, s.classroom, s.course_id, "
-				+ "c.course_name, " + "e.enrollment_source, e.points_used " + "FROM Enrollment e "
-				+ "JOIN Section s ON e.section_id = s.section_id " + "JOIN Course c ON s.course_id = c.course_id "
-				+ "WHERE e.student_id = ? " + "ORDER BY s.section_id";
+        public List<EnrollmentDetail> getMyEnrollment(int studentId) throws SQLException {
+                String sql = "SELECT s.section_id, s.section_number, s.professor, " + "s.capacity, s.classroom, s.course_id, "
+                                + "c.course_name, " + "e.enrollment_source, e.points_used " + "FROM Enrollment e "
+                                + "JOIN Section s ON e.section_id = s.section_id " + "JOIN Course c ON s.course_id = c.course_id "
+                                + "WHERE e.student_id = ? " + "ORDER BY s.section_id";
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -52,8 +52,52 @@ public class EnrollmentDAO {
 			DBConnection.close(rs, pstmt, conn);
 		}
 
-		return list;
-	}
+                return list;
+        }
+
+        /**
+         * 전체 등록 조회: 학생 구분 없이 모든 등록 정보를 반환
+         */
+        public List<EnrollmentDetail> getAllEnrollment() throws SQLException {
+                String sql = "SELECT e.student_id, s.section_id, s.section_number, s.professor, "
+                                + "s.capacity, s.classroom, s.course_id, c.course_name, e.enrollment_source, e.points_used "
+                                + "FROM Enrollment e " + "JOIN Section s ON e.section_id = s.section_id "
+                                + "JOIN Course c ON s.course_id = c.course_id " + "ORDER BY e.student_id, s.section_id";
+
+                Connection conn = null;
+                PreparedStatement pstmt = null;
+                ResultSet rs = null;
+                List<EnrollmentDetail> list = new ArrayList<>();
+
+                try {
+                        conn = DBConnection.getConnection();
+                        pstmt = conn.prepareStatement(sql);
+
+                        rs = pstmt.executeQuery();
+
+                        while (rs.next()) {
+                                EnrollmentDetail detail = new EnrollmentDetail();
+                                detail.setStudentId(rs.getInt(1));
+                                detail.setSectionId(rs.getString(2));
+                                detail.setSectionNumber(rs.getInt(3));
+                                detail.setProfessor(rs.getString(4));
+                                detail.setCapacity(rs.getInt(5));
+                                detail.setClassroom(rs.getString(6));
+                                detail.setCourseId(rs.getString(7));
+                                detail.setCourseName(rs.getString(8));
+                                detail.setEnrollmentSource(rs.getString(9));
+                                detail.setPointsUsed(rs.getInt(10));
+                                list.add(detail);
+                        }
+
+                } catch (SQLException e) {
+                        throw e;
+                } finally {
+                        DBConnection.close(rs, pstmt, conn);
+                }
+
+                return list;
+        }
 
 	/**
 	 * 수강 신청 삭제

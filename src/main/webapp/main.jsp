@@ -43,11 +43,11 @@
                                         class="menu-card">
                                         <h3>경매</h3>
                                         <p>경매를 관리하세요</p>
-				</a> <a href="<%=request.getContextPath()%>/enrollment/myEnrollment.jsp"
-					class="menu-card">
-					<h3>등록 조회</h3>
-					<p>내가 수강중인 강의들을 확인하세요</p>
-				</a>
+                                </a> <a href="<%=request.getContextPath()%>/enrollment/list"
+                                        class="menu-card">
+                                        <h3>등록 조회</h3>
+                                        <p>내가 수강중인 강의들을 확인하세요</p>
+                                </a>
 			</div>
 		</div>
         </div>
