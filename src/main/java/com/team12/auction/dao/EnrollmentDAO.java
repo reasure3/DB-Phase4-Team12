@@ -20,10 +20,10 @@ public class EnrollmentDAO {
                 sql.append("       s.section_id, s.section_number, s.professor, s.capacity, s.classroom, ");
                 sql.append("       c.course_id, c.course_name ");
                 sql.append("FROM Enrollment e ");
-                sql.append("JOIN Section s ON e.section_id = s.section_id ");
-                sql.append("JOIN Course c ON s.course_id = c.course_id ");
+                sql.append("LEFT JOIN Section s ON e.section_id = s.section_id ");
+                sql.append("LEFT JOIN Course c ON s.course_id = c.course_id ");
                 sql.append("WHERE e.student_id = ? ");
-                sql.append("ORDER BY s.section_id");
+                sql.append("ORDER BY NVL(s.section_id, e.section_id)");
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
