@@ -122,7 +122,8 @@ public class AuctionBidServlet extends HttpServlet {
                         }
 
                         Bid bid = new Bid();
-                        bid.setBidSequence(bidDAO.generateBidSequence());
+                        // bid_sequence는 insertBid 내부에서 자동 생성됨
+//                        bid.setBidSequence(bidDAO.generateBidSequence());
                         bid.setBidAmount(bidAmount);
                         bid.setAuctionId(auctionId);
                         bid.setStudentId(studentId);
