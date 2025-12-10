@@ -37,17 +37,17 @@ public class MyEnrollmentServlet extends HttpServlet {
 
                 int studentId = (Integer) session.getAttribute("studentId");
 
-                List<EnrollmentDetail> enrollments = new ArrayList<>();
+                List<EnrollmentDetail> myEnrollments = new ArrayList<>();
 
                 try {
                         List<EnrollmentDetail> fetched = enrollmentDAO.getMyEnrollment(studentId);
-                        enrollments = fetched != null ? fetched : Collections.emptyList();
+                        myEnrollments = fetched != null ? fetched : Collections.emptyList();
                 } catch (SQLException e) {
                         e.printStackTrace();
                         request.setAttribute("errorMessage", "수강신청 내역을 불러오는 중 오류가 발생했습니다.");
                 }
 
-                request.setAttribute("enrollments", enrollments);
+                request.setAttribute("myEnrollments", myEnrollments);
 
                 request.getRequestDispatcher("/enrollment/myEnrollment.jsp").forward(request, response);
         }
