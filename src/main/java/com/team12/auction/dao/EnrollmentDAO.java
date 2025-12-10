@@ -14,11 +14,16 @@ public class EnrollmentDAO {
 	/**
 	 * 나의 등록 조회: 내가 수강 신청한 분반의 모든 속성과 강의 이름 반환
 	 */
-	public List<EnrollmentDetail> getMyEnrollment(int studentId) throws SQLException {
-		String sql = "SELECT s.section_id, s.section_number, s.professor, " + "s.capacity, s.classroom, s.course_id, "
-				+ "c.course_name, " + "e.enrollment_source, e.points_used " + "FROM Enrollment e "
-				+ "JOIN Section s ON e.section_id = s.section_id " + "JOIN Course c ON s.course_id = c.course_id "
-				+ "WHERE e.student_id = ? " + "ORDER BY s.section_id";
+        public List<EnrollmentDetail> getMyEnrollment(int studentId) throws SQLException {
+                StringBuilder sql = new StringBuilder();
+                sql.append("SELECT e.enrollment_id, e.enrollment_source, e.points_used, e.enrollment_time, e.student_id, ");
+                sql.append("       s.section_id, s.section_number, s.professor, s.capacity, s.classroom, ");
+                sql.append("       c.course_id, c.course_name ");
+                sql.append("FROM Enrollment e ");
+                sql.append("JOIN Section s ON e.section_id = s.section_id ");
+                sql.append("JOIN Course c ON s.course_id = c.course_id ");
+                sql.append("WHERE e.student_id = ? ");
+                sql.append("ORDER BY s.section_id");
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -27,24 +32,27 @@ public class EnrollmentDAO {
 
 		try {
 			conn = DBConnection.getConnection();
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, studentId);
+                        pstmt = conn.prepareStatement(sql.toString());
+                        pstmt.setInt(1, studentId);
 
 			rs = pstmt.executeQuery();
 
 			while (rs.next()) {
 				EnrollmentDetail detail = new EnrollmentDetail();
-				detail.setSectionId(rs.getString(1));
-				detail.setSectionNumber(rs.getInt(2));
-				detail.setProfessor(rs.getString(3));
-				detail.setCapacity(rs.getInt(4));
-				detail.setClassroom(rs.getString(5));
-				detail.setCourseId(rs.getString(6));
-				detail.setCourseName(rs.getString(7));
-				detail.setEnrollmentSource(rs.getString(8));
-				detail.setPointsUsed(rs.getInt(9));
-				list.add(detail);
-			}
+                                detail.setEnrollmentId(rs.getString(1));
+                                detail.setEnrollmentSource(rs.getString(2));
+                                detail.setPointsUsed(rs.getInt(3));
+                                detail.setEnrollmentTime(rs.getDate(4));
+                                detail.setStudentId(rs.getInt(5));
+                                detail.setSectionId(rs.getString(6));
+                                detail.setSectionNumber(rs.getInt(7));
+                                detail.setProfessor(rs.getString(8));
+                                detail.setCapacity(rs.getInt(9));
+                                detail.setClassroom(rs.getString(10));
+                                detail.setCourseId(rs.getString(11));
+                                detail.setCourseName(rs.getString(12));
+                                list.add(detail);
+                        }
 
 		} catch (SQLException e) {
 			throw e;
