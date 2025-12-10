@@ -403,4 +403,74 @@ public class BidDAO {
 
         return enrollmentId;
     }
+
+    /**
+     * 경매 종료 시점에 낙찰자 확정 및 수강신청 삽입 (트랜잭션은 호출자가 관리)
+     */
+    public void finalizeAuctionBids(Connection conn, String auctionId, int availableSlots, String sectionId) throws SQLException {
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            String selectSql = "SELECT bid_sequence, bid_amount, bid_time, student_id FROM Bid WHERE auction_id = ? "
+                + "ORDER BY bid_amount DESC, bid_time ASC";
+
+            pstmt = conn.prepareStatement(selectSql);
+            pstmt.setString(1, auctionId);
+            rs = pstmt.executeQuery();
+
+            List<Bid> bids = new ArrayList<>();
+            while (rs.next()) {
+                Bid bid = new Bid();
+                bid.setBidSequence(rs.getString(1));
+                bid.setBidAmount(rs.getInt(2));
+                bid.setBidTime(rs.getDate(3));
+                bid.setStudentId(rs.getInt(4));
+                bids.add(bid);
+            }
+            rs.close();
+            pstmt.close();
+
+            String updateSql = "UPDATE Bid SET is_successful = ? WHERE bid_sequence = ?";
+            pstmt = conn.prepareStatement(updateSql);
+
+            int rank = 1;
+            for (Bid bid : bids) {
+                String successFlag = rank <= availableSlots ? "Y" : "N";
+                pstmt.setString(1, successFlag);
+                pstmt.setString(2, bid.getBidSequence());
+                pstmt.addBatch();
+
+                if ("Y".equals(successFlag)) {
+                    String enrollmentId = generateEnrollmentId(conn);
+                    insertEnrollment(conn, enrollmentId, bid.getBidAmount(), bid.getStudentId(), sectionId);
+                }
+
+                rank++;
+            }
+
+            pstmt.executeBatch();
+        } finally {
+            DBConnection.close(rs, pstmt, null);
+        }
+    }
+
+    private void insertEnrollment(Connection conn, String enrollmentId, int pointsUsed, int studentId, String sectionId) throws SQLException {
+        PreparedStatement pstmt = null;
+        try {
+            String insertEnrollmentSql = "INSERT INTO Enrollment (enrollment_id, enrollment_source, points_used, enrollment_time, student_id, section_id) "
+                + "VALUES (?, 'FROM_AUCTION', ?, SYSDATE, ?, ?)";
+
+            pstmt = conn.prepareStatement(insertEnrollmentSql);
+            pstmt.setString(1, enrollmentId);
+            pstmt.setInt(2, pointsUsed);
+            pstmt.setInt(3, studentId);
+            pstmt.setString(4, sectionId);
+            pstmt.executeUpdate();
+        } finally {
+            if (pstmt != null) {
+                pstmt.close();
+            }
+        }
+    }
 }

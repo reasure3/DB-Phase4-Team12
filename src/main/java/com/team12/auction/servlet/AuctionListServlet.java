@@ -3,6 +3,7 @@ package com.team12.auction.servlet;
 import com.team12.auction.dao.AuctionDAO;
 import com.team12.auction.model.dto.AuctionDetail;
 import com.team12.auction.model.entity.Bid;
+import com.team12.auction.service.AuctionService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,10 +20,12 @@ import java.util.Map;
 public class AuctionListServlet extends HttpServlet {
 
         private AuctionDAO auctionDAO;
+        private AuctionService auctionService;
 
         @Override
         public void init() throws ServletException {
                 auctionDAO = new AuctionDAO();
+                auctionService = new AuctionService();
         }
 
         @Override
@@ -40,6 +43,7 @@ public class AuctionListServlet extends HttpServlet {
                 int studentId = (Integer) session.getAttribute("studentId");
 
                 try {
+                        auctionService.finalizeExpiredAuctions();
                         Map<AuctionDetail, Bid> auctionBidMap = auctionDAO.selectMyAuctions(studentId);
 
                         // LinkedHashMap으로 복사해 조회 순서를 유지
