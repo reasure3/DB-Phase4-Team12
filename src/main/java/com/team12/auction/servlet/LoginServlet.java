@@ -16,6 +16,8 @@ import java.io.Serial;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @WebServlet("/auth/login")
 public class LoginServlet extends HttpServlet {
@@ -25,10 +27,15 @@ public class LoginServlet extends HttpServlet {
 	private StudentDAO studentDAO;
     private LogDAO logDAO;
 
+    private ExecutorService executorService;
+
     @Override
     public void init() throws ServletException {
         studentDAO = new StudentDAO();
         logDAO = new LogDAO();
+
+        // 최대 10개의 스레드로 로그 처리
+        executorService = Executors.newFixedThreadPool(10);
     }
 
 	@Override
@@ -68,15 +75,24 @@ public class LoginServlet extends HttpServlet {
 				session.setAttribute("studentId", student.getStudentId());
 				session.setAttribute("studentName", student.getName());
 
-                Log log = new Log();
-                log.setActionType("LOGIN");
-                log.setDetails("Student " + studentId + " login");
-                log.setStudentId(studentId);
-                log.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
-                logDAO.insertLog(log);
-
-                // main.jsp로 리다이렉트
+                // 먼저 main.jsp로 리다이렉트
                 response.sendRedirect(request.getContextPath() + "/main.jsp");
+
+                // 로그는 스레드 풀에서 비동기 처리
+                final int finalStudentId = studentId;
+                executorService.submit(() -> {
+                    try {
+                        Log log = new Log();
+                        log.setActionType("LOGIN");
+                        log.setDetails("Student " + finalStudentId + " login");
+                        log.setStudentId(finalStudentId);
+                        log.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+                        logDAO.insertLog(log);
+                    } catch (SQLException e) {
+                        System.err.println("[Async] Failed to insert login log for student: " + finalStudentId);
+                        e.printStackTrace();
+                    }
+                });
             } else {
                 // 로그인 실패: 에러 메시지와 함께 login.jsp로 포워드
                 request.setAttribute("errorMessage", "학번 또는 비밀번호가 올바르지 않습니다.");

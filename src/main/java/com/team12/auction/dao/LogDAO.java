@@ -174,7 +174,9 @@ public class LogDAO {
             }
 
             int rowsAffected = pstmt.executeUpdate();
+            conn.commit();
             log.setLogId(logId);
+            System.out.println("end commit: " + log);
             return rowsAffected > 0;
         } catch (SQLException e) {
             DBConnection.rollback(conn);
