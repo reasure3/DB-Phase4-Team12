@@ -179,8 +179,8 @@ public class AuctionDAO {
 	/**
 	 * 경매 존재 여부 확인
 	 */
-	public boolean existsById(String auctionId) throws SQLException {
-		String sql = "SELECT COUNT(*) FROM AUCTION WHERE auction_id = ?";
+        public boolean existsById(String auctionId) throws SQLException {
+                String sql = "SELECT COUNT(*) FROM AUCTION WHERE auction_id = ?";
 
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -202,6 +202,73 @@ public class AuctionDAO {
 			DBConnection.close(rs, pstmt, conn);
 		}
 
-		return false;
-	}
+                return false;
+        }
+
+        /**
+         * 종료 시간이 지나고 여전히 ACTIVE 상태인 경매 조회
+         */
+        public List<AuctionDetail> selectExpiredActiveAuctions() throws SQLException {
+                String sql = "SELECT a.auction_id, a.start_time, a.end_time, a.status, a.available_slots, a.created_at, a.section_id, "
+                                + "s.section_number, s.professor, c.course_id, c.course_name, c.department, c.credits "
+                                + "FROM AUCTION a "
+                                + "JOIN SECTION s ON a.section_id = s.section_id "
+                                + "JOIN COURSE c ON s.course_id = c.course_id "
+                                + "WHERE a.status = 'ACTIVE' AND a.end_time < SYSDATE";
+
+                List<AuctionDetail> expiredAuctions = new ArrayList<>();
+
+                Connection conn = null;
+                PreparedStatement pstmt = null;
+                ResultSet rs = null;
+
+                try {
+                        conn = DBConnection.getConnection();
+                        pstmt = conn.prepareStatement(sql);
+                        rs = pstmt.executeQuery();
+
+                        while (rs.next()) {
+                                AuctionDetail auction = new AuctionDetail();
+                                auction.setAuctionId(rs.getString(1));
+                                auction.setStartTime(rs.getDate(2));
+                                auction.setEndTime(rs.getDate(3));
+                                auction.setStatus(rs.getString(4));
+                                auction.setAvailableSlots(rs.getInt(5));
+                                auction.setCreatedAt(rs.getDate(6));
+                                auction.setSectionId(rs.getString(7));
+                                auction.setSectionNumber(rs.getInt(8));
+                                auction.setProfessor(rs.getString(9));
+                                auction.setCourseId(rs.getString(10));
+                                auction.setCourseName(rs.getString(11));
+                                auction.setDepartment(rs.getString(12));
+                                auction.setCredits(rs.getInt(13));
+                                expiredAuctions.add(auction);
+                        }
+                } catch (SQLException e) {
+                        throw e;
+                } finally {
+                        DBConnection.close(rs, pstmt, conn);
+                }
+
+                return expiredAuctions;
+        }
+
+        /**
+         * 경매 상태 업데이트 (외부 트랜잭션을 사용)
+         */
+        public void updateStatus(Connection conn, String auctionId, String status) throws SQLException {
+                PreparedStatement pstmt = null;
+
+                try {
+                        String sql = "UPDATE AUCTION SET status = ? WHERE auction_id = ?";
+                        pstmt = conn.prepareStatement(sql);
+                        pstmt.setString(1, status);
+                        pstmt.setString(2, auctionId);
+                        pstmt.executeUpdate();
+                } finally {
+                        if (pstmt != null) {
+                                pstmt.close();
+                        }
+                }
+        }
 }
